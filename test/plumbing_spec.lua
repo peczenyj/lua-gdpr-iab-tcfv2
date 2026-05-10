@@ -1,6 +1,6 @@
-local bit = require("src.bit")
-local base64 = require("src.base64")
-local BitStream = require("src.bitstream")
+local bit = require("gdpr.iab.tcfv2.bit")
+local base64 = require("gdpr.iab.tcfv2.base64")
+local BitStream = require("gdpr.iab.tcfv2.bitstream")
 
 describe("Plumbing", function()
   describe("Bit bridge", function()
