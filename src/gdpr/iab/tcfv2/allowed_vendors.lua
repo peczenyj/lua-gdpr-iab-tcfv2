@@ -22,4 +22,10 @@ function AllowedVendors.new(decoded_data, options)
   return self
 end
 
+function AllowedVendors:to_table()
+  return {
+    vendorAllowed = self.vendorAllowed,
+  }
+end
+
 return AllowedVendors

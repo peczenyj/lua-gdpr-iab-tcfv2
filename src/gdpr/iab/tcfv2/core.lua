@@ -46,13 +46,10 @@ local function decode_publisher_restrictions(bs)
       end
 
       for vendor_id = start_id, end_id do
-        if not res[vendor_id] then
-          res[vendor_id] = {}
+        if not res[purpose_id] then
+          res[purpose_id] = {}
         end
-        if not res[vendor_id][purpose_id] then
-          res[vendor_id][purpose_id] = {}
-        end
-        res[vendor_id][purpose_id][restriction_type] = true
+        res[purpose_id][vendor_id] = restriction_type
       end
     end
   end
@@ -167,7 +164,6 @@ local FIELDS = {
     end
     self.bs:seek(offset)
     local res = decode_publisher_restrictions(self.bs)
-    self._cache.publisherTC_offset = self.bs:pos()
     return res
   end,
 }

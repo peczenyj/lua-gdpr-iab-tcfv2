@@ -22,4 +22,10 @@ function DisclosedVendors.new(decoded_data, options)
   return self
 end
 
+function DisclosedVendors:to_table()
+  return {
+    vendorDisclosed = self.vendorDisclosed,
+  }
+end
+
 return DisclosedVendors

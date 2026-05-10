@@ -16,7 +16,8 @@ function PublisherTC.new(decoded_data, options)
   local pubPurposesConsent = common.decode_bitfield_fixed(bs, nil, 24)
   local pubPurposesLITransparency = common.decode_bitfield_fixed(bs, nil, 24)
 
-  local numCustomPurposes = bs:read_int(6)
+  local numCustom_val = bs:read_int(6)
+  local numCustomPurposes = numCustom_val or 0
   local customPurposesConsent =
     common.decode_bitfield_fixed(bs, nil, numCustomPurposes)
   local customPurposesLITransparency =
@@ -31,6 +32,16 @@ function PublisherTC.new(decoded_data, options)
   }, PublisherTC)
 
   return self
+end
+
+function PublisherTC:to_table()
+  return {
+    pubPurposesConsent = self.pubPurposesConsent,
+    pubPurposesLITransparency = self.pubPurposesLITransparency,
+    numCustomPurposes = self.numCustomPurposes,
+    customPurposesConsent = self.customPurposesConsent,
+    customPurposesLITransparency = self.customPurposesLITransparency,
+  }
 end
 
 return PublisherTC

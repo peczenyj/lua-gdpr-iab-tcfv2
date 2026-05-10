@@ -2,73 +2,74 @@ local harness = require("golden_harness")
 local parity = require("parity_helper")
 local tcf = require("gdpr.iab.tcfv2")
 
+-- Environment configuration
+local FULL_CORPUS = os.getenv("TCF_FULL_CORPUS") == "1"
+local DEEP_LIMIT = tonumber(os.getenv("TCF_DEEP_LIMIT")) or 16
+local SCAN_LIMIT = tonumber(os.getenv("TCF_SCAN_LIMIT")) or 100
+
 describe("Golden Parity", function()
-  it("matches Perl logical output for the core segment", function()
+  it("matches Perl logical output", function()
     local count = 0
     harness.read_golden(function(data)
       count = count + 1
+
       if data.expect_failure then
         return
       end
 
       local parser, err = tcf.new(data.tc_string)
       if not parser then
-        error("Failed to parse " .. data.tc_string .. ": " .. tostring(err))
+        error(
+          string.format(
+            "Line %d: Failed to parse %s: %s",
+            count,
+            data.tc_string,
+            tostring(err)
+          )
+        )
       end
 
-      local actual = parity.map_to_perl_shape(parser:to_table())
-      local expected = data.tests.to_json
-
-      -- Compare basic fields
-      local fields = {
-        "version",
-        "cmp_id",
-        "cmp_version",
-        "consent_screen",
-        "consent_language",
-        "vendor_list_version",
-        "policy_version",
-        "is_service_specific",
-        "use_non_standard_stacks",
-        "purpose_one_treatment",
-        "publisher_country_code",
-      }
-
-      for _, f in ipairs(fields) do
-        local msg = "Field mismatch: " .. f .. " in " .. data.tc_string
-        assert.are.equal(expected[f], actual[f], msg)
+      -- 1. Full Deep Comparison for the first X items
+      if count <= DEEP_LIMIT or FULL_CORPUS then
+        local actual = parity.map_to_perl_shape(parser:to_table())
+        local expected = data.tests.to_json
+        local ok, diff_err = parity.deep_compare(actual, expected)
+        assert.is_true(
+          ok,
+          string.format(
+            "Deep mismatch at line %d: %s",
+            count,
+            tostring(diff_err)
+          )
+        )
       end
 
-      -- Compare dates (ignore minor formatting differences if they exist)
-      assert.are.equal(
-        expected.created,
-        actual.created,
-        "Created date mismatch"
-      )
-      assert.are.equal(
-        expected.last_updated,
-        actual.last_updated,
-        "Last updated date mismatch"
-      )
+      -- 2. Randomized Fuzz/Sampling for other items (if not doing full corpus)
+      if count > DEEP_LIMIT and not FULL_CORPUS then
+        local expected = data.tests.to_json
 
-      -- Sampling tests
-      if data.tests.sampling then
-        local sampling = data.tests.sampling
-        if sampling.vendor_284_consent ~= nil then
-          local actual_val = parser.vendorConsents[284] == true
-          local msg = "Sampling mismatch: vendor_284_consent"
-          assert.are.equal(sampling.vendor_284_consent, actual_val, msg)
-        end
-        if sampling.purpose_1_consent ~= nil then
-          local actual_val = parser.purposeConsents[1] == true
-          local msg = "Sampling mismatch: purpose_1_consent"
-          assert.are.equal(sampling.purpose_1_consent, actual_val, msg)
+        -- Verify Header Parity (Cheap)
+        assert.are.equal(expected.version, parser.version)
+        assert.are.equal(expected.cmp_id, parser.cmpId)
+        assert.are.equal(expected.policy_version, parser.policyVersion)
+
+        -- verify a random subset of vendor consents
+        -- we pick 5 random IDs between 1 and 2000
+        for _ = 1, 5 do
+          local vid = math.random(1, 2000)
+          local actual_val = parser.vendorConsents[vid] == true
+          local expected_val = (expected.vendor.consents[tostring(vid)] == true)
+          assert.are.equal(
+            expected_val,
+            actual_val,
+            string.format("Fuzz mismatch: Vendor %d at line %d", vid, count)
+          )
         end
       end
 
-      -- Only test first 50 entries for now to keep CI fast during dev
-      if count >= 50 then
-        return true
+      -- 3. Global scan limit for dev speed
+      if not FULL_CORPUS and count >= SCAN_LIMIT then
+        return true -- Stop reading file
       end
     end)
   end)
