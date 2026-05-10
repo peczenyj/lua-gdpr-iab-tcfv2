@@ -1,5 +1,3 @@
-local bit = require("src.bit")
-
 local BitStream = {}
 BitStream.__index = BitStream
 
