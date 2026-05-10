@@ -5,13 +5,15 @@ describe("Fuzz Testing", function()
   describe("Golden Corpus Random Sampling", function()
     it("matches Perl logical output for random vendors", function()
       local count = 0
-      -- We only perform random sampling on the first 128 lines
-      -- because they are the only ones guaranteed to have 'to_json' data.
-      local limit = 128
       harness.read_golden(function(data)
         count = count + 1
 
         if data.expect_failure then
+          return
+        end
+
+        -- Dynamically detect if this line has full parity data
+        if not data.tests.to_json then
           return
         end
 
@@ -28,10 +30,6 @@ describe("Fuzz Testing", function()
             actual_val,
             string.format("Line %d: Vendor %d mismatch", count, vid)
           )
-        end
-
-        if count >= limit then
-          return true
         end
       end)
     end)
