@@ -13,7 +13,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        luaversion: ["5.1", "5.2", "5.3", "5.4"]
+        luaversion: ["5.1", "5.2", "5.3", "5.4", "luajit", "luajit-openresty"]
 
     steps:
     - uses: actions/checkout@v4
@@ -39,7 +39,13 @@ jobs:
         luarocks install luacov
 
     - name: Run CI (Format Check, Lint, Test, Coverage)
-      run: make ci
+      run: |
+        # If luajit is used, we ensure Makefile uses it
+        if [ "${{ matrix.luaversion }}" == "luajit" ] || [ "${{ matrix.luaversion }}" == "luajit-openresty" ]; then
+          make ci LUA_BIN=luajit
+        else
+          make ci
+        fi
 
   release:
     needs: test
