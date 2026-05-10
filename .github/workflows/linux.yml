@@ -45,9 +45,11 @@ jobs:
     - name: Run CI (Format Check, Lint, Test, Coverage)
       run: |
         if [[ "${{ matrix.luaVersion }}" == "luajit"* ]]; then
+          # Full corpus for JIT/OpenResty
           make ci LUA_BIN=luajit
         else
-          make ci
+          # Quick tests for PUC-Rio Lua versions
+          make ci BUSTED="TCF_QUICK=1 busted"
         fi
 
     - name: Verify Rockspec

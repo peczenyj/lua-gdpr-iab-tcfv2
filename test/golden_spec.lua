@@ -3,9 +3,15 @@ local parity = require("parity_helper")
 local tcf = require("gdpr.iab.tcfv2")
 
 -- Environment configuration
-local FULL_CORPUS = os.getenv("TCF_FULL_CORPUS") == "1"
+-- TCF_FULL_CORPUS is now 1 by default unless TCF_QUICK is set
+local FULL_CORPUS = os.getenv("TCF_FULL_CORPUS") ~= "0"
 local VERBOSE = os.getenv("TCF_VERBOSE") == "1"
 local CONTINUE_ON_FAILURE = os.getenv("TCF_CONTINUE_ON_FAILURE") == "1"
+local QUICK_MODE = os.getenv("TCF_QUICK") == "1"
+
+if QUICK_MODE then
+  FULL_CORPUS = false
+end
 
 -- Robust Limit Handling
 local function get_limit(env_var, default)
@@ -17,9 +23,9 @@ local function get_limit(env_var, default)
 end
 
 local DEEP_LIMIT = get_limit("TCF_DEEP_LIMIT", 16)
-local SCAN_LIMIT = get_limit("TCF_SCAN_LIMIT", 100)
+local SCAN_LIMIT = get_limit("TCF_SCAN_LIMIT", 128)
 
--- Ensure logic remains sound if user provides small scan limit but large deep limit
+-- Ensure logic remains sound
 if DEEP_LIMIT > SCAN_LIMIT and not FULL_CORPUS then
   SCAN_LIMIT = DEEP_LIMIT
 end
@@ -54,7 +60,7 @@ describe("Golden Parity", function()
           error(string.format("Failed to parse: %s", tostring(p_err)))
         end
 
-        -- 1. Full Deep Comparison for the first X items
+        -- 1. Full Deep Comparison for the first X items OR all items if FULL_CORPUS
         if count <= DEEP_LIMIT or FULL_CORPUS then
           local actual = parity.map_to_perl_shape(parser)
           local expected = data.tests.to_json
@@ -65,8 +71,8 @@ describe("Golden Parity", function()
           end
         end
 
-        -- 2. Randomized Fuzz/Sampling for other items (if not doing full corpus)
-        if count > DEEP_LIMIT and not FULL_CORPUS then
+        -- 2. Randomized Fuzz/Sampling for other items (if doing quick scan)
+        if not FULL_CORPUS and count > DEEP_LIMIT then
           local expected = data.tests.to_json
 
           -- Verify Header Parity (Cheap)
@@ -78,9 +84,8 @@ describe("Golden Parity", function()
           for _ = 1, 5 do
             local vid = math.random(1, 2000)
             local actual_val = parser.vendorConsents[vid] == true
-            local expected_val = (
-              expected.vendor.consents[tostring(vid)] == true
-            )
+            local expected_val =
+              (expected.vendor.consents[tostring(vid)] == true)
             assert.are.equal(
               expected_val,
               actual_val,
@@ -95,7 +100,6 @@ describe("Golden Parity", function()
           string.format("[%s:%d] %s", filename, count, tostring(err))
         if CONTINUE_ON_FAILURE then
           table.insert(failures, failure_msg)
-          -- Print immediate feedback in verbose mode even if continuing
           if VERBOSE then
             print("     !! FAILURE: " .. failure_msg)
           end
@@ -104,7 +108,7 @@ describe("Golden Parity", function()
         end
       end
 
-      -- 3. Global scan limit for dev speed
+      -- 3. Global scan limit for dev speed in QUICK_MODE
       if not FULL_CORPUS and count >= SCAN_LIMIT then
         return true -- Stop reading file
       end
@@ -112,9 +116,7 @@ describe("Golden Parity", function()
 
     if #failures > 0 then
       local error_blob = table.concat(failures, "\n")
-      error(
-        "Corpus Parity Failed with " .. #failures .. " errors:\n" .. error_blob
-      )
+      error("Corpus Parity Failed with " .. #failures .. " errors:\n" .. error_blob)
     end
   end)
 end)
