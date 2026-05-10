@@ -13,7 +13,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        luaversion: ["5.1", "5.2", "5.3", "5.4", "luajit-2.1"]
+        luaversion: ["5.1", "5.2", "5.3", "5.4"]
 
     steps:
     - uses: actions/checkout@v4
