@@ -49,11 +49,15 @@ The test suite behavior can be customized using the following environment variab
 ## Makefile Targets
 
 - `make setup`: Initialize local LuaRocks dependencies.
-- `make task`: Development loop (Format + Lint + Unit Tests).
-- `make ci`: Full verification (Verify Format + Lint + Unit + Reference + Fuzz).
-- `make test`: Run **Unit Tests** only.
-- `make test-reference`: Run the **Full Golden Corpus scan**.
-- `make test-fuzz`: Run **Randomized Fuzz tests**.
-- `make coverage`: Run Unit Tests and print coverage summary to stdout.
-- `make lint`: Run the linter.
-- `make format`: Apply code formatting.
+...
+- `make coverage`: Generate a coverage report (Luacov).
+
+## Golden Corpus Management
+
+To keep the repository size manageable, the Golden Corpus is partially optimized by stripping large `to_json` data from lines 129 onwards. You can verify the integrity of the file using the provided script:
+
+```bash
+./scripts/optimize_golden.sh <original_full_corpus.jsonl> test/corpus/golden.jsonl
+```
+
+If the optimization was performed correctly, `git status` should show no changes to the file.
