@@ -16,7 +16,8 @@ Before you start, ensure you have the following installed:
     - StyLua is a Rust-based tool and is **not** available via LuaRocks.
     - **Installation**:
         - **macOS**: `brew install stylua`
-        - **Linux**: Download the latest binary from the [StyLua Releases](https://github.com/JohnnyMorganz/StyLua/releases) page, unzip it, and move it to your `/usr/local/bin/`.
+        - **Rust/Cargo**: `cargo install stylua`
+        - **Linux (Manual)**: Download the latest binary from the [StyLua Releases](https://github.com/JohnnyMorganz/StyLua/releases) page, unzip it, and move it to your `/usr/local/bin/`.
         - **GitHub Action**: Handled automatically in CI.
 
 ## Development Workflow
