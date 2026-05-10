@@ -2,9 +2,9 @@ name: Linux Tests
 
 on:
   push:
-    branches: [ devel, main ]
+    branches: [ devel, main, "exp/*" ]
   pull_request:
-    branches: [ devel, main ]
+    branches: [ devel, main, "exp/*" ]
 
 jobs:
   test:
