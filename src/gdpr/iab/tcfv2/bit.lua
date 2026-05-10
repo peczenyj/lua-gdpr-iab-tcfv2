@@ -1,12 +1,17 @@
+--- Version-agnostic bitwise bridge.
+-- Supports Lua 5.1 (native bit), 5.2 (bit32), 5.3+ (native operators), and LuaJIT.
+-- @module gdpr.iab.tcfv2.bit
+-- @author Tiago Peczenyj
+-- @license MIT
+
 local M = {}
 
--- Detect environment
-local is_lua53_plus = _VERSION >= "Lua 5.3"
+-- Detect environment and select best available bitwise logic
 local has_bit32, bit32 = pcall(require, "bit32")
 local has_bit, bit = pcall(require, "bit")
 
-if is_lua53_plus then
-  -- Use native operators via load string to prevent syntax errors in Lua < 5.3
+if _VERSION >= "Lua 5.3" then
+  -- Use native 5.3+ operators (via load to maintain 5.1 compatibility)
   M.band = load("return function(a, b) return a & b end")()
   M.bor = load("return function(a, b) return a | b end")()
   M.bxor = load("return function(a, b) return a ~ b end")()
@@ -28,32 +33,49 @@ elseif has_bit then
   M.lshift = bit.lshift
   M.rshift = bit.rshift
 else
-  -- Pure Lua fallback for Lua 5.1 (non-JIT)
-  local function make_bitop(op)
-    return function(a, b)
-      local r = 0
-      for i = 0, 31 do
-        local ai = a % 2
-        local bi = b % 2
-        a = math.floor(a / 2)
-        b = math.floor(b / 2)
-        if op(ai, bi) then
-          r = r + 2 ^ i
-        end
+  -- Fallback to pure math (Slow, but ensures 5.1 compatibility without extensions)
+  M.band = function(a, b)
+    local result = 0
+    local bit_val = 1
+    for i = 1, 32 do
+      if a % 2 == 1 and b % 2 == 1 then
+        result = result + bit_val
       end
-      return r
+      a = math.floor(a / 2)
+      b = math.floor(b / 2)
+      bit_val = bit_val * 2
     end
+    return result
   end
 
-  M.band = make_bitop(function(a, b)
-    return a == 1 and b == 1
-  end)
-  M.bor = make_bitop(function(a, b)
-    return a == 1 or b == 1
-  end)
-  M.bxor = make_bitop(function(a, b)
-    return a ~= b
-  end)
+  M.bor = function(a, b)
+    local result = 0
+    local bit_val = 1
+    for i = 1, 32 do
+      if a % 2 == 1 or b % 2 == 1 then
+        result = result + bit_val
+      end
+      a = math.floor(a / 2)
+      b = math.floor(b / 2)
+      bit_val = bit_val * 2
+    end
+    return result
+  end
+
+  M.bxor = function(a, b)
+    local result = 0
+    local bit_val = 1
+    for i = 1, 32 do
+      if a % 2 ~= b % 2 then
+        result = result + bit_val
+      end
+      a = math.floor(a / 2)
+      b = math.floor(b / 2)
+      bit_val = bit_val * 2
+    end
+    return result
+  end
+
   M.bnot = function(a)
     local r = 0
     for i = 0, 31 do
@@ -64,6 +86,7 @@ else
     end
     return r
   end
+
   M.lshift = function(a, n)
     return (a * 2 ^ n) % 2 ^ 32
   end

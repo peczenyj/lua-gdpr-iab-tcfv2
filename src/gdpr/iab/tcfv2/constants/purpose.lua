@@ -1,26 +1,24 @@
+--- Purpose IDs and names for IAB TCF v2.x.
+-- @module gdpr.iab.tcfv2.constants.purpose
+-- @author Tiago Peczenyj
+-- @license MIT
+
 local M = {
-  INFO_STORAGE_ACCESS = 1,
-  SELECT_BASIC_ADS = 2,
-  CREATE_PERSONALIZED_ADS = 3,
-  SELECT_PERSONALIZED_ADS = 4,
-  CREATE_PERSONALIZED_CONTENT = 5,
-  SELECT_PERSONALIZED_CONTENT = 6,
-  MEASURE_AD_PERFORMANCE = 7,
-  MEASURE_CONTENT_PERFORMANCE = 8,
-  MARKET_RESEARCH = 9,
-  DEVELOP_IMPROVE = 10,
-  LINK_DEVICES = 11,
+  [1] = "Store and/or access information on a device",
+  [2] = "Select basic ads",
+  [3] = "Create a personalised ads profile",
+  [4] = "Select personalised ads",
+  [5] = "Create a personalised content profile",
+  [6] = "Select personalised content",
+  [7] = "Measure ad performance",
+  [8] = "Measure content performance",
+  [9] = "Apply market research to generate audience insights",
+  [10] = "Develop and improve products",
 }
 
-local names = {}
+-- Bi-directional mapping
 for k, v in pairs(M) do
-  names[v] = k
+  M[v] = k
 end
-
-setmetatable(M, {
-  __index = function(_, key)
-    return names[key]
-  end,
-})
 
 return M

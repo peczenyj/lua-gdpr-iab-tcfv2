@@ -1,9 +1,19 @@
+--- Segment decoder for Publisher TC (Type 3).
+-- @classmod gdpr.iab.tcfv2.publisher_tc
+-- @author Tiago Peczenyj
+-- @license MIT
+
 local BitStream = require("gdpr.iab.tcfv2.bitstream")
 local common = require("gdpr.iab.tcfv2.common")
 
 local PublisherTC = {}
 PublisherTC.__index = PublisherTC
 
+--- Creates a new Publisher TC segment instance.
+-- @function new
+-- @param decoded_data string Raw binary data for the segment.
+-- @param[opt] options table Configuration options.
+-- @return table|nil PublisherTC instance or nil on error.
 function PublisherTC.new(decoded_data, options)
   local bs = BitStream.new(decoded_data)
   local segment_type = bs:read_int(3)
@@ -34,6 +44,9 @@ function PublisherTC.new(decoded_data, options)
   return self
 end
 
+--- Converts publisher TC segment fields to a plain table.
+-- @function to_table
+-- @return table
 function PublisherTC:to_table()
   return {
     pubPurposesConsent = self.pubPurposesConsent,

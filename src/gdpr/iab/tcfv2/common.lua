@@ -1,5 +1,14 @@
+--- Shared decoding utilities for TCF segments.
+-- @module gdpr.iab.tcfv2.common
+-- @author Tiago Peczenyj
+-- @license MIT
+
 local M = {}
 
+--- Decodes a 6-bit character (A-Z).
+-- @function decode_char6
+-- @param bs table BitStream instance.
+-- @return string|nil Decoded character or nil on EOF.
 function M.decode_char6(bs)
   local val = bs:read_int(6)
   if not val then
@@ -8,6 +17,10 @@ function M.decode_char6(bs)
   return string.char(string.byte("A") + val)
 end
 
+--- Decodes a 2-character language code.
+-- @function decode_language
+-- @param bs table BitStream instance.
+-- @return string|nil Decoded language code or nil on EOF.
 function M.decode_language(bs)
   local c1 = M.decode_char6(bs)
   local c2 = M.decode_char6(bs)
@@ -17,6 +30,12 @@ function M.decode_language(bs)
   return c1 .. c2
 end
 
+--- Decodes a fixed-length bitfield into a boolean table.
+-- @function decode_bitfield_fixed
+-- @param bs table BitStream instance.
+-- @param start_offset integer|nil Optional bit position to seek to.
+-- @param length integer Number of bits to read.
+-- @return table Table where indices are boolean values.
 function M.decode_bitfield_fixed(bs, start_offset, length)
   if start_offset then
     bs:seek(start_offset)
@@ -88,6 +107,13 @@ local function decode_vendor_range(bs, target_vendors)
   return res
 end
 
+--- Decodes a standard Vendor Section (Bitfield or Range).
+-- @function decode_vendor_section
+-- @param bs table BitStream instance.
+-- @param start_offset integer|nil Optional bit position to seek to.
+-- @param[opt] options table Configuration options (supports targetVendors).
+-- @return table|nil Decoded vendor table or nil on error.
+-- @return integer Current bit position after decoding.
 function M.decode_vendor_section(bs, start_offset, options)
   if start_offset then
     bs:seek(start_offset)

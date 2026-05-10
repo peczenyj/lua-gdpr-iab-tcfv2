@@ -1,8 +1,24 @@
-local tcf = require("gdpr.iab.tcfv2")
+--- Policy engine for performing compliance checks on IAB TC strings.
+-- @classmod gdpr.iab.tcfv2.validator
+-- @author Tiago Peczenyj
+-- @license MIT
+
+local Parser = require("gdpr.iab.tcfv2.parser")
 
 local Validator = {}
 Validator.__index = Validator
 
+--- Creates a new Validator instance with a fixed specification.
+-- @function new
+-- @param config table Validation rules.
+-- @param[opt] config.vendor_id integer The ID of the vendor to validate.
+-- @param[opt] config.consent_purpose_ids table List of purpose IDs requiring explicit consent.
+-- @param[opt] config.legitimate_interest_purpose_ids table List of purpose IDs requiring legitimate interest.
+-- @param[opt] config.flexible_purpose_ids table List of purpose IDs that can switch legal basis.
+-- @param[opt] config.verify_disclosed_vendors boolean Ensure vendor is in the Disclosed Vendors segment.
+-- @param[opt] config.min_tcf_policy_version integer Minimum required TCF Policy version.
+-- @param[opt] config.strict_legal_basis boolean Throw error on invalid purpose combinations.
+-- @return table Validator instance.
 function Validator.new(config)
   local self = setmetatable({}, Validator)
   self.config = config or {}
@@ -13,7 +29,7 @@ local function get_parser(tc_string_or_obj, options)
   if type(tc_string_or_obj) == "table" then
     return tc_string_or_obj
   end
-  return tcf.new(tc_string_or_obj, options)
+  return Parser.new(tc_string_or_obj, options)
 end
 
 local function is_in_table(val, tbl)
@@ -28,6 +44,14 @@ local function is_in_table(val, tbl)
   return false
 end
 
+--- Checks if a vendor has allowed consent for a specific purpose.
+-- Considers both standard consent and publisher restrictions.
+-- @function is_vendor_consent_allowed
+-- @param parser table TCF Parser instance.
+-- @param vendor_id integer The vendor ID.
+-- @param purpose_id integer The purpose ID.
+-- @return boolean true if allowed.
+-- @return string|nil Error message if denied.
 function Validator:is_vendor_consent_allowed(parser, vendor_id, purpose_id)
   if not parser.vendorConsents[vendor_id] then
     return false, string.format("missing consent for vendor %d", vendor_id)
@@ -60,6 +84,14 @@ function Validator:is_vendor_consent_allowed(parser, vendor_id, purpose_id)
   return true
 end
 
+--- Checks if a vendor has legitimate interest for a specific purpose.
+-- Considers both standard LI and publisher restrictions.
+-- @function is_vendor_legitimate_interest_allowed
+-- @param parser table TCF Parser instance.
+-- @param vendor_id integer The vendor ID.
+-- @param purpose_id integer The purpose ID.
+-- @return boolean true if allowed.
+-- @return string|nil Error message if denied.
 function Validator:is_vendor_legitimate_interest_allowed(
   parser,
   vendor_id,
@@ -101,6 +133,13 @@ function Validator:is_vendor_legitimate_interest_allowed(
   return true
 end
 
+--- Validates a TC string or object against the configured rules.
+-- Returns on the first failure (fail-fast).
+-- @function validate
+-- @param tc_string_or_obj string|table TC string or Parser object.
+-- @param[opt] overrides table Temporary overrides for this call.
+-- @return boolean true if valid.
+-- @return string|nil Error message on failure.
 function Validator:validate(tc_string_or_obj, overrides)
   local conf = self.config
   if overrides then
@@ -203,6 +242,12 @@ function Validator:validate(tc_string_or_obj, overrides)
   return true
 end
 
+--- Performs all validation checks and returns all found violations.
+-- @function validate_all
+-- @param tc_string_or_obj string|table TC string or Parser object.
+-- @param[opt] overrides table Temporary overrides for this call.
+-- @return boolean true if valid.
+-- @return table|nil List of error messages if invalid.
 function Validator:validate_all(tc_string_or_obj, overrides)
   local errors = {}
   -- Placeholder for full accumulation logic

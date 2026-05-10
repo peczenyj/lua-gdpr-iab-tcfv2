@@ -41,11 +41,12 @@ A zero-dependency, JIT-optimized Lua parser for IAB TCF v2.x.
 - [x] Route Type 1 (Disclosed), Type 2 (Allowed), Type 3 (Pub TC).
 
 
-### Phase 4: Validator & Documentation
-- [ ] Implement `src/gdpr/iab/tcfv2/validator.lua` as a separate policy engine.
-- [ ] Finalize `src/gdpr/iab/tcfv2/init.lua` public API.
-- [ ] Complete LDoc annotations for all public tables and methods.
-- [ ] Create `README.md` with Middleware Recipes (OpenResty/HAProxy).
+### Phase 4: Validator & Documentation [DONE]
+- [x] Implement `src/gdpr/iab/tcfv2/validator.lua` as a separate policy engine.
+- [x] Finalize `src/gdpr/iab/tcfv2/init.lua` public API.
+- [x] Complete LDoc annotations for all public tables and methods.
+- [x] Create `README.md` with Middleware Recipes (OpenResty/HAProxy).
+
 
 ### Phase 5: Verification & Performance
 - [ ] Run full Golden Corpus suite (Verify MD5 consistency).

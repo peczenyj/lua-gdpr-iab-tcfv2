@@ -1,11 +1,15 @@
+--- High-performance bit-level reader for binary data.
+-- @classmod gdpr.iab.tcfv2.bitstream
+-- @author Tiago Peczenyj
+-- @license MIT
+
 local BitStream = {}
 BitStream.__index = BitStream
 
-local POW2 = {}
-for i = 0, 64 do
-  POW2[i] = 2 ^ i
-end
-
+--- Creates a new BitStream instance.
+-- @function new
+-- @param data string Raw binary data.
+-- @return table BitStream instance.
 function BitStream.new(data)
   local self = setmetatable({}, BitStream)
   self.data = data
@@ -14,51 +18,45 @@ function BitStream.new(data)
   return self
 end
 
+--- Reads an unsigned integer from the stream.
+-- @function read_int
+-- @param bits integer Number of bits to read.
+-- @return integer|nil Decoded integer or nil on EOF.
+-- @return string|nil Error message on failure.
 function BitStream:read_int(bits)
-  if bits == 0 then
-    return 0
+  local res = 0
+  for i = 1, bits do
+    local pos = self.bit_pos
+    local byte_idx = math.floor(pos / 8) + 1
+    if byte_idx > self.len then
+      return nil, "unexpected end of stream"
+    end
+
+    local byte = string.byte(self.data, byte_idx)
+    local bit_idx = 7 - (pos % 8)
+    local bit = math.floor(byte / (2 ^ bit_idx)) % 2
+
+    res = (res * 2) + bit
+    self.bit_pos = pos + 1
   end
-  if self.bit_pos + bits > self.len * 8 then
-    return nil, "unexpected end of bitstream"
-  end
-
-  local val = 0
-  local remaining = bits
-
-  while remaining > 0 do
-    local byte_pos = math.floor(self.bit_pos / 8) + 1
-    local bit_in_byte = self.bit_pos % 8
-    local bits_left_in_byte = 8 - bit_in_byte
-
-    local take = math.min(remaining, bits_left_in_byte)
-    local byte = string.byte(self.data, byte_pos)
-
-    -- Extract 'take' bits starting from 'bit_in_byte' (from high to low)
-    -- Shift right to remove bits to the right of our target
-    local shift_right = bits_left_in_byte - take
-    local mask_val = math.floor(byte / POW2[shift_right]) % POW2[take]
-
-    val = val * POW2[take] + mask_val
-
-    self.bit_pos = self.bit_pos + take
-    remaining = remaining - take
-  end
-
-  return val
+  return res
 end
 
+--- Reads a single bit as a boolean.
+-- @function read_bool
+-- @return boolean|nil true if 1, false if 0, nil on EOF.
 function BitStream:read_bool()
   local val, err = self:read_int(1)
-  if err then
+  if val == nil then
     return nil, err
   end
   return val == 1
 end
 
-function BitStream:skip(bits)
-  self.bit_pos = self.bit_pos + bits
-end
-
+--- Peeks an unsigned integer without advancing the position.
+-- @function peek_int
+-- @param bits integer Number of bits to peek.
+-- @return integer|nil Decoded integer or nil on EOF.
 function BitStream:peek_int(bits)
   local old_pos = self.bit_pos
   local val, err = self:read_int(bits)
@@ -66,10 +64,16 @@ function BitStream:peek_int(bits)
   return val, err
 end
 
+--- Returns the current bit position.
+-- @function pos
+-- @return integer
 function BitStream:pos()
   return self.bit_pos
 end
 
+--- Moves the reader to a specific bit position.
+-- @function seek
+-- @param pos integer The 0-based bit position.
 function BitStream:seek(pos)
   self.bit_pos = pos
 end

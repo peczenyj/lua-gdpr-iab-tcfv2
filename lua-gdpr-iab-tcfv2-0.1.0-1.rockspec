@@ -31,6 +31,7 @@ build = {
       ["gdpr.iab.tcfv2.bitstream"] = "src/gdpr/iab/tcfv2/bitstream.lua",
       ["gdpr.iab.tcfv2.common"] = "src/gdpr/iab/tcfv2/common.lua",
       ["gdpr.iab.tcfv2.core"] = "src/gdpr/iab/tcfv2/core.lua",
+      ["gdpr.iab.tcfv2.parser"] = "src/gdpr/iab/tcfv2/parser.lua",
       ["gdpr.iab.tcfv2.allowed_vendors"] = "src/gdpr/iab/tcfv2/allowed_vendors.lua",
       ["gdpr.iab.tcfv2.disclosed_vendors"] = "src/gdpr/iab/tcfv2/disclosed_vendors.lua",
       ["gdpr.iab.tcfv2.publisher_tc"] = "src/gdpr/iab/tcfv2/publisher_tc.lua",

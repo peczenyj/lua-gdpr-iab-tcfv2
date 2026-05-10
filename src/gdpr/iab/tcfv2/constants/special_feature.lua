@@ -1,17 +1,16 @@
+--- Special Feature IDs and names for IAB TCF v2.x.
+-- @module gdpr.iab.tcfv2.constants.special_feature
+-- @author Tiago Peczenyj
+-- @license MIT
+
 local M = {
-  PRECISE_GEOLOCATION = 1,
-  SCAN_DEVICE_CHARACTERISTICS = 2,
+  [1] = "Use precise geolocation data",
+  [2] = "Actively scan device characteristics for identification",
 }
 
-local names = {}
+-- Bi-directional mapping
 for k, v in pairs(M) do
-  names[v] = k
+  M[v] = k
 end
-
-setmetatable(M, {
-  __index = function(_, key)
-    return names[key]
-  end,
-})
 
 return M
