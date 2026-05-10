@@ -47,6 +47,9 @@ describe("Core Segment", function()
   it("handles targetVendors optimization", function()
     local parser = tcf.new(tc_string, { targetVendors = { 284, 999 } })
     assert.is_true(parser.vendorConsents[284])
-    assert.is_nil(parser.vendorConsents[1], "vendor 1 should be ignored due to targetVendors")
+    assert.is_nil(
+      parser.vendorConsents[1],
+      "vendor 1 should be ignored due to targetVendors"
+    )
   end)
 end)

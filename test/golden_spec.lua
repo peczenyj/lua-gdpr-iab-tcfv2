@@ -7,31 +7,49 @@ describe("Golden Parity", function()
     local count = 0
     harness.read_golden(function(data)
       count = count + 1
-      if data.expect_failure then return end
-      
+      if data.expect_failure then
+        return
+      end
+
       local parser, err = tcf.new(data.tc_string)
       if not parser then
         error("Failed to parse " .. data.tc_string .. ": " .. tostring(err))
       end
-      
+
       local actual = parity.map_to_perl_shape(parser:to_table())
       local expected = data.tests.to_json
-      
+
       -- Compare basic fields
       local fields = {
-        "version", "cmp_id", "cmp_version", "consent_screen", "consent_language",
-        "vendor_list_version", "policy_version", "is_service_specific",
-        "use_non_standard_stacks", "purpose_one_treatment", "publisher_country_code"
+        "version",
+        "cmp_id",
+        "cmp_version",
+        "consent_screen",
+        "consent_language",
+        "vendor_list_version",
+        "policy_version",
+        "is_service_specific",
+        "use_non_standard_stacks",
+        "purpose_one_treatment",
+        "publisher_country_code",
       }
-      
+
       for _, f in ipairs(fields) do
         local msg = "Field mismatch: " .. f .. " in " .. data.tc_string
         assert.are.equal(expected[f], actual[f], msg)
       end
-      
+
       -- Compare dates (ignore minor formatting differences if they exist)
-      assert.are.equal(expected.created, actual.created, "Created date mismatch")
-      assert.are.equal(expected.last_updated, actual.last_updated, "Last updated date mismatch")
+      assert.are.equal(
+        expected.created,
+        actual.created,
+        "Created date mismatch"
+      )
+      assert.are.equal(
+        expected.last_updated,
+        actual.last_updated,
+        "Last updated date mismatch"
+      )
 
       -- Sampling tests
       if data.tests.sampling then
@@ -49,7 +67,9 @@ describe("Golden Parity", function()
       end
 
       -- Only test first 50 entries for now to keep CI fast during dev
-      if count >= 50 then return true end
+      if count >= 50 then
+        return true
+      end
     end)
   end)
 end)
