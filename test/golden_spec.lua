@@ -36,10 +36,12 @@ describe("Golden Parity", function()
       if data.tests.sampling then
         local sampling = data.tests.sampling
         if sampling.vendor_284_consent ~= nil then
-          assert.are.equal(sampling.vendor_284_consent, parser.vendorConsents[284] == true, "Sampling mismatch: vendor_284_consent")
+          local actual_val = parser.vendorConsents[284] == true
+          assert.are.equal(sampling.vendor_284_consent, actual_val, "Sampling mismatch: vendor_284_consent")
         end
         if sampling.purpose_1_consent ~= nil then
-          assert.are.equal(sampling.purpose_1_consent, parser.purposeConsents[1] == true, "Sampling mismatch: purpose_1_consent")
+          local actual_val = parser.purposeConsents[1] == true
+          assert.are.equal(sampling.purpose_1_consent, actual_val, "Sampling mismatch: purpose_1_consent")
         end
       end
 

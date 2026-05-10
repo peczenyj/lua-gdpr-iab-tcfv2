@@ -3,13 +3,6 @@ local Core = require("gdpr.iab.tcfv2.core")
 
 local M = {}
 
-local SEGMENT_TYPES = {
-    CORE              = 0,
-    DISCLOSED_VENDORS = 1,
-    ALLOWED_VENDORS   = 2,
-    PUBLISHER_TC      = 3,
-}
-
 local function split(input, sep)
     local t = {}
     for str in string.gmatch(input, "([^" .. sep .. "]+)") do
