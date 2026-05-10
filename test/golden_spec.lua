@@ -25,7 +25,8 @@ describe("Golden Parity", function()
       }
       
       for _, f in ipairs(fields) do
-        assert.are.equal(expected[f], actual[f], "Field mismatch: " .. f .. " in " .. data.tc_string)
+        local msg = "Field mismatch: " .. f .. " in " .. data.tc_string
+        assert.are.equal(expected[f], actual[f], msg)
       end
       
       -- Compare dates (ignore minor formatting differences if they exist)
@@ -37,11 +38,13 @@ describe("Golden Parity", function()
         local sampling = data.tests.sampling
         if sampling.vendor_284_consent ~= nil then
           local actual_val = parser.vendorConsents[284] == true
-          assert.are.equal(sampling.vendor_284_consent, actual_val, "Sampling mismatch: vendor_284_consent")
+          local msg = "Sampling mismatch: vendor_284_consent"
+          assert.are.equal(sampling.vendor_284_consent, actual_val, msg)
         end
         if sampling.purpose_1_consent ~= nil then
           local actual_val = parser.purposeConsents[1] == true
-          assert.are.equal(sampling.purpose_1_consent, actual_val, "Sampling mismatch: purpose_1_consent")
+          local msg = "Sampling mismatch: purpose_1_consent"
+          assert.are.equal(sampling.purpose_1_consent, actual_val, msg)
         end
       end
 
