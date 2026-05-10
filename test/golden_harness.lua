@@ -21,7 +21,9 @@ function M.read_golden(callback)
     if line ~= "" then
       local status, data = pcall(json.decode, line)
       if status then
-        callback(data)
+        if callback(data) then
+          break
+        end
       else
         print("JSON Decode Error: " .. tostring(data))
         print("Line: [" .. line .. "]")
