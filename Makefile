@@ -24,7 +24,7 @@ ROCKS_CLUA   = $(ROCKS_PATH)/lib/lua/$(LUA_VERSION)/?.so
 ROCKS_BIN    = $(ROCKS_PATH)/bin
 
 # Environment setup for local dependencies
-ENV_SETUP    = export LUA_PATH="$(ROCKS_LUA);./src/?.lua;./?.lua;;" && \
+ENV_SETUP    = export LUA_PATH="$(ROCKS_LUA);./src/?.lua;./test/?.lua;./?.lua;;" && \
                export LUA_CPATH="$(ROCKS_CLUA);;" && \
                export PATH="$(ROCKS_BIN):$$PATH"
 
@@ -80,7 +80,7 @@ dist:
 install:
 	@echo "Installing to standard Lua path..."
 	@mkdir -p /usr/local/share/lua/$(LUA_VERSION)/gdpr/iab/tcfv2
-	@cp src/*.lua /usr/local/share/lua/$(LUA_VERSION)/gdpr/iab/tcfv2/
+	@cp src/gdpr/iab/tcfv2/*.lua /usr/local/share/lua/$(LUA_VERSION)/gdpr/iab/tcfv2/
 	@echo "Done."
 
 clean:
