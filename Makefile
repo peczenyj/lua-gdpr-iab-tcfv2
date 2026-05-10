@@ -14,9 +14,15 @@ TEST_DIR     = test
 DIST_NAME    = lua-gdpr-iab-tcfv2
 VERSION      = 0.1.0
 
-.PHONY: all test lint format coverage changelog dist install clean
+.PHONY: all test lint format coverage changelog dist install clean setup
 
 all: test
+
+setup:
+	@echo "Installing development dependencies..."
+	$(LUAROCKS) install --only-deps --tree .rocks *.rockspec
+	@echo "Dependencies installed in .rocks/"
+	@echo "Run 'export LUA_PATH=\"./.rocks/share/lua/$(LUA_VERSION)/?.lua;./src/?.lua;;\"; export PATH=\"./.rocks/bin:$$PATH\"' to use them."
 
 test:
 	@export LUA_PATH="./?.lua;./src/?.lua;;" && $(BUSTED) $(TEST_DIR)

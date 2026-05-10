@@ -32,12 +32,23 @@ if not parser then
     print("Error: " .. err)
     return
 end
-
+```lua
 print(parser.cmpId)
 print(parser.vendorConsents[284]) -- true/false
 ```
 
 ## Development
+
+### First-time Setup
+To set up the development environment, ensure you have **LuaRocks** installed, then run:
+
+```bash
+make setup
+export LUA_PATH="./.rocks/share/lua/5.4/?.lua;./src/?.lua;;"
+export PATH="./.rocks/bin:$PATH"
+```
+*(Adjust `5.4` to your Lua version if necessary).*
+
 See [TODO.md](TODO.md) for the project roadmap and [AGENTS.md](AGENTS.md) for technical conventions.
 
 ## License

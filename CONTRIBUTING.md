@@ -12,28 +12,34 @@ This project follows a Gitflow-like branching model:
 ## Development Workflow
 
 1.  **Fork and Clone**: Fork the repository on GitHub and clone it locally.
-2.  **Create a Branch**: Branch off from `devel`.
+2.  **Setup Dependencies**: Ensure you have `luarocks` installed, then initialize the local environment:
+    ```bash
+    make setup
+    # Follow the instructions printed by make setup to update your PATH and LUA_PATH
+    ```
+3.  **Create a Branch**: Branch off from `devel`.
     ```bash
     git checkout devel
     git pull origin devel
     git checkout -b feat/my-new-feature
     ```
-3.  **Implement and Test**: Make your changes. Ensure you add tests in `test/` (using Busted).
-4.  **Lint and Format**: Before committing, run the linter and formatter.
+4.  **Implement and Test**: Make your changes. Ensure you add tests in `test/` (using Busted).
+5.  **Lint and Format**: Before committing, run the linter and formatter.
     ```bash
     make lint
     make format
     ```
-5.  **Commit**: Use Conventional Commits (`type(scope): description`).
+6.  **Commit**: Use Conventional Commits (`type(scope): description`).
     ```bash
     git commit -m "feat(parser): add support for new segment"
     ```
-6.  **Push and PR**: Push your branch to your fork and open a Pull Request against the `devel` branch.
+7.  **Push and PR**: Push your branch to your fork and open a Pull Request against the `devel` branch.
 
 ## Tooling
 
 This project uses a `Makefile` to orchestrate development tasks:
 
+- `make setup`: Install development dependencies locally via LuaRocks.
 - `make test`: Run the test suite (requires Busted).
 - `make lint`: Check code quality (requires Luacheck).
 - `make format`: Format code (requires StyLua).
