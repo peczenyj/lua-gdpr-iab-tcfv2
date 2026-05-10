@@ -30,11 +30,11 @@ A zero-dependency, JIT-optimized Lua parser for IAB TCF v2.x.
 - [x] **Golden Harness**: Setup `test/corpus/` with Perl's `golden.jsonl` and a minimal JSON reader for verification.
 
 ### Phase 2: Core Segment & Lazy Infrastructure
-- [ ] Implement `src/core.lua` with metatable-based lazy decoding.
-- [ ] Implement BitField and RangeSection decoders with internal caching.
-- [ ] Implement `src/constants/` (Purpose, SpecialFeature, RestrictionType) as bi-directional tables.
-- [ ] Implement `strict` vs `lenient` mode and `targetVendors` optimization.
-- [ ] Map all fields to **CamelCase** (matching GVL/JSON).
+- [x] Implement `src/core.lua` with metatable-based lazy decoding.
+- [x] Implement BitField and RangeSection decoders with internal caching.
+- [x] Implement `src/constants/` (Purpose, SpecialFeature, RestrictionType) as bi-directional tables.
+- [x] Implement `strict` vs `lenient` mode and `targetVendors` optimization.
+- [x] Map all fields to **CamelCase** (matching GVL/JSON).
 
 ### Phase 3: Multi-Segment Router
 - [ ] Implement `src/router.lua` to handle `.` splitting.
