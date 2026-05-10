@@ -84,8 +84,9 @@ describe("Golden Parity", function()
           for _ = 1, 5 do
             local vid = math.random(1, 2000)
             local actual_val = parser.vendorConsents[vid] == true
-            local expected_val =
-              (expected.vendor.consents[tostring(vid)] == true)
+            local expected_val = (
+              expected.vendor.consents[tostring(vid)] == true
+            )
             assert.are.equal(
               expected_val,
               actual_val,
@@ -116,7 +117,9 @@ describe("Golden Parity", function()
 
     if #failures > 0 then
       local error_blob = table.concat(failures, "\n")
-      error("Corpus Parity Failed with " .. #failures .. " errors:\n" .. error_blob)
+      error(
+        "Corpus Parity Failed with " .. #failures .. " errors:\n" .. error_blob
+      )
     end
   end)
 end)
