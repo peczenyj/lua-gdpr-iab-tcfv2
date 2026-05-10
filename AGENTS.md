@@ -9,19 +9,28 @@ Optimized for high-performance middleware environments like **OpenResty** and **
 ## Operational Boundaries (Gitflow)
 1. **Branching Strategy**:
    - `devel`: Main development branch. All feature branches (`feat/*`) must merge here.
-   - `main`: Production/Release branch. Only includes tagged releases.
-2. **Release Process**: Releases are made from `devel` to `main` via `gitflow release` or equivalent workflow.
+   - `main`: Production/Release branch. Only includes tagged releases via `gitflow release`.
+2. **Release Process**: Releases are made from `devel` to `main`. Tags (`v*`) trigger automated release artifacts (.tar.gz) and potentially Luarocks uploads.
 3. **Commit Messages**: Follow Conventional Commits: `type(scope): short description`.
    - Types: `feat`, `fix`, `docs`, `style`, `refactor`, `test`, `chore`.
-4. **CI/CD**: GitHub Actions on Linux (and other suggested OS) must pass for all PRs.
+4. **CI/CD**: GitHub Actions on Linux (Matrix: 5.1, 5.2, 5.3, 5.4, LuaJIT, OpenResty) must pass.
 
 ## Technical Rules & Conventions
 1. **Lua Compatibility**: Compatible with Lua 5.1, 5.2, 5.3, 5.4, and LuaJIT.
-   - Zero-dependency: Use internal bridges for bitwise and Base64.
-2. **Architecture**: Lazy/On-demand decoding with caching.
-3. **Error Handling**: Return `nil, err` for parsing failures.
-4. **Data Representation**: Simple tables/numbers (JIT-friendly).
+   - **Zero-dependency**: No external libraries allowed in `src/`. Use internal bridges for bitwise and Base64.
+2. **Architecture**: **Lazy/On-demand decoding** with caching via metatables.
+3. **Error Handling**: 
+   - Return `nil, err` for parsing failures.
+   - **Lenient Mode**: (Default) Collect non-fatal structural issues in a `parser.warnings` table and continue.
+   - **Strict Mode**: Fail-fast; return `nil, err` on the first spec or structural violation.
+4. **Optimization**: Support `targetVendors` in the constructor for $O(1)$ single-pass decoding of specific IDs in RangeSections.
+5. **Data Representation**: 
+   - Use **CamelCase** for all TCF fields (matching GVL/JSON).
+   - Prefer raw tables and primitives for JIT-friendliness.
+   - Dates as integers (Deciseconds since epoch).
+6. **Separation of Concerns**: Keep the `Parser` (data extraction) separate from the `Validator` (policy enforcement).
 
 ## Build & Test
-- Run tests using the local Lua interpreter (if available) or via CI.
+- Use `Makefile` for all common tasks (`make test`, `make lint`, `make format`, `make dist`).
+- Tests MUST verify against the Perl Golden File corpus for logical parity.
 
