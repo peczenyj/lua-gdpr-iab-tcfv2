@@ -36,3 +36,7 @@ Optimized for high-performance middleware environments like **OpenResty** and **
 - Use `Makefile` for all common tasks (`make test`, `make lint`, `make format`, `make dist`).
 - Tests MUST verify against the Perl Golden File corpus for logical parity.
 - The Golden Corpus is stored uncompressed in `test/corpus/golden.jsonl` to avoid C-binding dependencies (gzip) during testing.
+
+## Interaction Rules
+1. **Response Priority**: If a user message contains a question mark (`?`), it **MUST** be answered comprehensively before the agent initiates any corresponding implementation or file modifications.
+2. **Clarification First**: When in doubt or when presented with architectural choices, explain the options and wait for a decision.
