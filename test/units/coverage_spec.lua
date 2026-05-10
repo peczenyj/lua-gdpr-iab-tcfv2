@@ -3,8 +3,7 @@ local Validator = tcf.Validator
 
 describe("Validator Error Paths and Edge Cases", function()
   -- TC string with 284 consent
-  local base_string =
-    "CP188cAQKFpAAAHABBENBSFsAP_gAEPgAAiQKqNX_H__bW9r8X73aft0eY1P9_j77uQxBhfJE-4"
+  local base_string = "CP188cAQKFpAAAHABBENBSFsAP_gAEPgAAiQKqNX_H__bW9r8X73aft0eY1P9_j77uQxBhfJE-4"
     .. "FzLvW_JwXx2ExNA36tqIKmRIEu3bBIQNlHJHUTVigaogVryHMak2cpTNKJ6BkiFMRM2dYCF5vm4tj-QKY5_r993dx2D"
     .. "-t_dv83dzyz81Hn3f5_2e0eLCdQ5-tDfv9bROb-9IPd_78v4v8_l_rk2_eT1n_tevr7D_-ft8__XW_9_fff_9Pn_-uB"
     .. "-_3_vf_EFUwCTDQqIA-wJCQg0DCKBACoKwgIoFAQAAJA0QEAJgwKdgYALrCRACAFAAMEAIAAQZAAgAAAgAQiACQAoEA"
@@ -58,22 +57,25 @@ describe("Validator Error Paths and Edge Cases", function()
       assert.are.equal("purpose 1 is restricted for vendor 284", err)
     end)
 
-    it("fails when LI is requested but restriction is Require Consent (Type 1)", function()
-      local parser = tcf.new(base_string)
-      -- Force LI and Vendor LI to true for test
-      parser.purposeLegitimateInterests[2] = true
-      parser.vendorLegitimateInterests[284] = true
-      -- Type 1: Require Consent
-      parser.publisherRestrictions[2] = { [284] = 1 }
+    it(
+      "fails when LI is requested but restriction is Require Consent (Type 1)",
+      function()
+        local parser = tcf.new(base_string)
+        -- Force LI and Vendor LI to true for test
+        parser.purposeLegitimateInterests[2] = true
+        parser.vendorLegitimateInterests[284] = true
+        -- Type 1: Require Consent
+        parser.publisherRestrictions[2] = { [284] = 1 }
 
-      local v = Validator.new({
-        vendor_id = 284,
-        legitimate_interest_purpose_ids = { 2 },
-      })
-      local ok, err = v:validate(parser)
-      assert.is_false(ok)
-      assert.are.equal("purpose 2 requires consent for vendor 284", err)
-    end)
+        local v = Validator.new({
+          vendor_id = 284,
+          legitimate_interest_purpose_ids = { 2 },
+        })
+        local ok, err = v:validate(parser)
+        assert.is_false(ok)
+        assert.are.equal("purpose 2 requires consent for vendor 284", err)
+      end
+    )
 
     it("handles Type 2 restriction in consent check", function()
       local parser = tcf.new(base_string)
@@ -143,8 +145,7 @@ describe("Allowed Vendors (Type 2 Segment)", function()
 end)
 
 describe("Structural coverage", function()
-  local base_string =
-    "CP188cAQKFpAAAHABBENBSFsAP_gAEPgAAiQKqNX_H__bW9r8X73aft0eY1P9_j77uQxBhfJE-4"
+  local base_string = "CP188cAQKFpAAAHABBENBSFsAP_gAEPgAAiQKqNX_H__bW9r8X73aft0eY1P9_j77uQxBhfJE-4"
     .. "FzLvW_JwXx2ExNA36tqIKmRIEu3bBIQNlHJHUTVigaogVryHMak2cpTNKJ6BkiFMRM2dYCF5vm4tj-QKY5_r993dx2D"
     .. "-t_dv83dzyz81Hn3f5_2e0eLCdQ5-tDfv9bROb-9IPd_78v4v8_l_rk2_eT1n_tevr7D_-ft8__XW_9_fff_9Pn_-uB"
     .. "-_3_vf_EFUwCTDQqIA-wJCQg0DCKBACoKwgIoFAQAAJA0QEAJgwKdgYALrCRACAFAAMEAIAAQZAAgAAAgAQiACQAoEA"
