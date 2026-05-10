@@ -23,12 +23,12 @@ TEST_FUZZ      = test/fuzz
 
 # Local dependencies path
 ROCKS_PATH   = ./.rocks
-ROCKS_LUA    = $(ROCKS_PATH)/share/lua/$(LUA_VERSION)/?.lua
+ROCKS_LUA    = $(ROCKS_PATH)/share/lua/$(LUA_VERSION)/?.lua;$(ROCKS_PATH)/share/lua/$(LUA_VERSION)/?/init.lua
 ROCKS_CLUA   = $(ROCKS_PATH)/lib/lua/$(LUA_VERSION)/?.so
 ROCKS_BIN    = $(ROCKS_PATH)/bin
 
 # Environment setup for local dependencies
-ENV_SETUP    = export LUA_PATH="$(ROCKS_LUA);./src/?.lua;./test/?.lua;./?.lua;;" && \
+ENV_SETUP    = export LUA_PATH="$(ROCKS_LUA);./src/?.lua;./src/?/init.lua;./test/?.lua;./?.lua;;" && \
                export LUA_CPATH="$(ROCKS_CLUA);;" && \
                export PATH="$(ROCKS_BIN):$$PATH"
 
@@ -39,7 +39,7 @@ else
   BUSTED_FLAGS =
 endif
 
-.PHONY: all test test-reference test-fuzz lint format check-format coverage report-coverage changelog dist install clean setup ci task
+.PHONY: all test test-reference test-fuzz lint format check-format coverage report-coverage bench changelog dist install clean setup ci task
 
 all: test
 
@@ -92,6 +92,9 @@ coverage:
 
 report-coverage:
 	@$(ENV_SETUP) && luacov-coveralls -i src
+
+bench:
+	@$(ENV_SETUP) && $(LUA_BIN) bench/runner.lua
 
 changelog:
 	$(GIT_CLIFF) -o CHANGELOG.md
