@@ -21,7 +21,7 @@ print("Testing Base64url...")
 -- 'A' is 000000 in 6-bit. 'B' is 000001.
 -- 'AB' -> 000000 000001 -> 00000000 0001....
 -- 00000000 is 0. 00010000 is 16.
-local decoded, err = base64.decode_url("AB")
+local decoded = base64.decode_url("AB")
 assert_eq(decoded:sub(1,1), string.char(0), "base64 decode 1")
 
 -- TCF test string snippet: 'COw'
