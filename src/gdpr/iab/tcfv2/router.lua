@@ -1,3 +1,9 @@
+--- Router for TCF segments.
+-- Identifies and routes additional segments (Type 1, 2, 3) to their decoders.
+-- @module gdpr.iab.tcfv2.router
+-- @author Tiago Peczenyj
+-- @license MIT
+
 local base64 = require("gdpr.iab.tcfv2.base64")
 local BitStream = require("gdpr.iab.tcfv2.bitstream")
 local DisclosedVendors = require("gdpr.iab.tcfv2.disclosed_vendors")
@@ -12,6 +18,12 @@ local DECODERS = {
   [3] = PublisherTC,
 }
 
+--- Decodes and routes all non-core segments.
+-- @function decode_segments
+-- @param segments table List of Base64url encoded segments.
+-- @param[opt] options table Configuration options.
+-- @return table|nil Map of segment type to segment object, or nil on error.
+-- @return string|nil Error message if decoding failed.
 function Router.decode_segments(segments, options)
   local results = {}
   -- Skip the first segment (Core)

@@ -1,3 +1,8 @@
+--- Core segment decoder for IAB TCF v2.x.
+-- @classmod gdpr.iab.tcfv2.core
+-- @author Tiago Peczenyj
+-- @license MIT
+
 local BitStream = require("gdpr.iab.tcfv2.bitstream")
 local common = require("gdpr.iab.tcfv2.common")
 
@@ -168,6 +173,11 @@ local FIELDS = {
   end,
 }
 
+--- Creates a new Core segment instance.
+-- @function new
+-- @param decoded_data string Raw binary data for the core segment.
+-- @param[opt] options table Configuration options.
+-- @return table Core segment instance.
 function Core.new(decoded_data, options)
   local self = setmetatable({
     bs = BitStream.new(decoded_data),
@@ -193,6 +203,9 @@ function Core.new(decoded_data, options)
   return self
 end
 
+--- Converts core segment fields to a plain table.
+-- @function to_table
+-- @return table
 function Core:to_table()
   local res = {}
   for key, _ in pairs(FIELDS) do

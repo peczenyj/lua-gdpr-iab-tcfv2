@@ -5,7 +5,7 @@
 [![License](https://img.shields.io/github/license/peczenyj/lua-gdpr-iab-tcfv2)](LICENSE)
 [![Coverage Status](https://coveralls.io/repos/github/peczenyj/lua-gdpr-iab-tcfv2/badge.svg)](https://coveralls.io/github/peczenyj/lua-gdpr-iab-tcfv2)
 
-A high-performance, zero-dependency, version-agnostic Lua parser for IAB TCF v2.x consent strings.
+A high-performance, zero-dependency, version-agnostic Lua parser and validator for IAB TCF v2.x consent strings.
 
 ## Features
 - **Agnostic**: Compatible with Lua 5.1, 5.2, 5.3, 5.4, and LuaJIT.
@@ -22,8 +22,8 @@ export LUA_PATH="./src/?.lua;;"
 ```
 
 ## Usage
-(Example below reflects the Phase 2 implementation)
 
+### Parsing a TC String
 ```lua
 local tcf = require("gdpr.iab.tcfv2")
 
@@ -32,9 +32,72 @@ if not parser then
     print("Error: " .. err)
     return
 end
-```lua
+
 print(parser.cmpId)
 print(parser.vendorConsents[284]) -- true/false
+```
+
+### Validation (Declarative Compliance)
+The Validator allows you to define your application's compliance requirements once and reuse them efficiently.
+
+```lua
+local tcf = require("gdpr.iab.tcfv2")
+local Validator = tcf.Validator
+
+local v = Validator.new({
+  vendor_id = 284,
+  consent_purpose_ids = { 1, 3 },
+  min_tcf_policy_version = 4
+})
+
+local ok, err = v:validate("CP4i3...AAA")
+if not ok then
+  ngx.log(ngx.ERR, "Compliance failed: ", err)
+end
+```
+
+## Middleware Recipes
+
+### OpenResty
+Integrating into an OpenResty access handler:
+
+```lua
+-- init_by_lua_block
+local Validator = require("gdpr.iab.tcfv2").Validator
+_G.compliance = Validator.new({
+  vendor_id = 284,
+  consent_purpose_ids = { 1 }
+})
+
+-- access_by_lua_block
+local tc_string = ngx.var.cookie_euconsent_v2
+if not tc_string then
+    ngx.exit(ngx.HTTP_FORBIDDEN)
+end
+
+local ok, err = _G.compliance:validate(tc_string)
+if not ok then
+    ngx.log(ngx.WARN, "GDPR violation: ", err)
+    ngx.exit(ngx.HTTP_FORBIDDEN)
+end
+```
+
+### HAProxy
+Using the Lua API in HAProxy:
+
+```lua
+-- tcf_filter.lua
+local tcf = require("gdpr.iab.tcfv2")
+local v = tcf.Validator.new({ vendor_id = 284, consent_purpose_ids = { 1 } })
+
+core.register_action("tcf_validate", { "http-req" }, function(txn)
+    local tc_string = txn.f:cook("euconsent-v2")
+    if tc_string then
+        local ok = v:validate(tc_string)
+        if ok then return end
+    end
+    txn.set_var(txn, "txn.tcf_denied", true)
+end)
 ```
 
 ## Development
@@ -44,13 +107,13 @@ To set up the development environment:
 
 1.  **Install Prerequisites**:
     - **LuaRocks**: `sudo apt install luarocks` (or `brew install luarocks`)
-    - **StyLua**: Download from [GitHub Releases](https://github.com/JohnnyMorganz/StyLua/releases) and add to PATH.
+    - **StyLua**: `cargo install stylua` (or `brew install stylua`)
 2.  **Initialize Environment**:
     ```bash
     make setup
     ```
 
-The `Makefile` automatically handles local dependencies in `.rocks/`. Use `make task` during development to format, lint, and test your changes.
+The `Makefile` automatically handles local dependencies in `.rocks/`. Use `make task` during development to format, lint, and run unit tests.
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for detailed instructions and [AGENTS.md](AGENTS.md) for technical conventions.
 

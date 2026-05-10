@@ -1,3 +1,8 @@
+--- Zero-dependency Base64url decoder.
+-- @module gdpr.iab.tcfv2.base64
+-- @author Tiago Peczenyj
+-- @license MIT
+
 local M = {}
 
 local chars_url =
@@ -13,20 +18,27 @@ end
 
 local decode_map_url = build_decode_map(chars_url)
 
+--- Decodes a Base64url encoded string.
+-- @function decode_url
+-- @param input string Base64url encoded string.
+-- @return string|nil Decoded binary data or nil on error.
+-- @return string|nil Error message if decoding failed.
 function M.decode_url(input)
-  -- Remove padding and invalid chars
-  input = input:gsub("[^%w%-_]", "")
+  if not input then
+    return nil, "missing input"
+  end
 
-  local length = #input
+  -- Remove padding and sanitize
+  local data = input:gsub("=", "")
   local output = {}
   local buffer = 0
   local bits = 0
 
-  for i = 1, length do
-    local char = input:sub(i, i)
+  for i = 1, #data do
+    local char = data:sub(i, i)
     local val = decode_map_url[char]
     if not val then
-      return nil, "invalid character in base64url string"
+      return nil, "invalid character in base64: " .. char
     end
 
     buffer = (buffer * 64) + val

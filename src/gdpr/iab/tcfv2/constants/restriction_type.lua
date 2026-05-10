@@ -1,18 +1,17 @@
+--- Publisher Restriction types for IAB TCF v2.x.
+-- @module gdpr.iab.tcfv2.constants.restriction_type
+-- @author Tiago Peczenyj
+-- @license MIT
+
 local M = {
-  NOT_ALLOWED = 0,
-  REQUIRE_CONSENT = 1,
-  REQUIRE_LEGITIMATE_INTEREST = 2,
+  [0] = "Not Allowed",
+  [1] = "Require Consent",
+  [2] = "Require Legitimate Interest",
 }
 
-local names = {}
+-- Bi-directional mapping
 for k, v in pairs(M) do
-  names[v] = k
+  M[v] = k
 end
-
-setmetatable(M, {
-  __index = function(_, key)
-    return names[key]
-  end,
-})
 
 return M
