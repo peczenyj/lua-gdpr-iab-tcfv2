@@ -39,5 +39,5 @@ Optimized for high-performance middleware environments like **OpenResty** and **
 - The Golden Corpus is stored uncompressed in `test/corpus/golden.jsonl` to avoid C-binding dependencies (gzip) during testing.
 
 ## Interaction Rules
-1. **Response Priority**: If a user message contains a question mark (`?`), it **MUST** be answered comprehensively before the agent initiates any corresponding implementation or file modifications.
-2. **Clarification First**: When in doubt or when presented with architectural choices, explain the options and wait for a decision.
+1. **Hard Stop Mandate**: If a user message contains a question mark (`?`), it **MUST** be treated as a circuit-breaker. The agent is **STRICTLY FORBIDDEN** from using any modification tools (`replace`, `write_file`, etc.) in the same turn. The agent must provide a comprehensive text-based answer and wait for a separate directive before initiating any implementation.
+2. **Clarification First**: When presented with architectural choices or ambiguous requirements, explain the options and wait for a decision.
