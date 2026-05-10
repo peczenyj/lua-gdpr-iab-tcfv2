@@ -13,9 +13,13 @@ LUACOV       = luacov
 GIT_CLIFF    = git-cliff
 
 SRC_DIR      = src
-TEST_DIR     = test
 DIST_NAME    = lua-gdpr-iab-tcfv2
 VERSION      = 0.1.0
+
+# Test Directories
+TEST_UNITS     = test/units
+TEST_REFERENCE = test/reference
+TEST_FUZZ      = test/fuzz
 
 # Local dependencies path
 ROCKS_PATH   = ./.rocks
@@ -24,7 +28,7 @@ ROCKS_CLUA   = $(ROCKS_PATH)/lib/lua/$(LUA_VERSION)/?.so
 ROCKS_BIN    = $(ROCKS_PATH)/bin
 
 # Environment setup for local dependencies
-ENV_SETUP    = export LUA_PATH="$(ROCKS_LUA);./src/?.lua;./test/?.lua;./?.lua;;" && \
+ENV_SETUP    = export LUA_PATH="$(ROCKS_LUA);./src/?.lua;./?.lua;;" && \
                export LUA_CPATH="$(ROCKS_CLUA);;" && \
                export PATH="$(ROCKS_BIN):$$PATH"
 
@@ -35,7 +39,7 @@ else
   BUSTED_FLAGS =
 endif
 
-.PHONY: all test test-quick fuzz lint format check-format coverage changelog dist install clean setup ci task
+.PHONY: all test test-reference test-fuzz lint format check-format coverage changelog dist install clean setup ci task
 
 all: test
 
@@ -48,37 +52,42 @@ setup:
 	$(LUAROCKS) install luacheck --tree $(ROCKS_PATH)
 	$(LUAROCKS) install luacov --tree $(ROCKS_PATH)
 	@echo "Dependencies installed in $(ROCKS_PATH)/"
-	@echo "Note: 'stylua' must be installed manually (see CONTRIBUTING.md)"
-	@echo "The Makefile will now automatically use them for 'make test', 'make lint', etc."
+	@echo "Note: 'stylua' must be installed manually (see DEVELOPMENT.md)"
 
-ci: check-format lint test
+# CI orchestrates all tests
+ci: check-format lint test test-reference test-fuzz
 	@echo "CI check passed successfully."
 
-task: format lint test-quick
+# Local development loop
+task: format lint test
 	@echo "Development tasks completed successfully."
 
+# Unit tests only (Default)
 test:
-	@$(ENV_SETUP) && $(BUSTED) $(BUSTED_FLAGS) $(TEST_DIR)
+	@$(ENV_SETUP) && $(BUSTED) $(BUSTED_FLAGS) $(TEST_UNITS)
 
-test-quick:
-	@$(ENV_SETUP) && export TCF_QUICK=1 && $(BUSTED) $(BUSTED_FLAGS) $(TEST_DIR)
+# Full Reference scan
+test-reference:
+	@$(ENV_SETUP) && $(BUSTED) $(BUSTED_FLAGS) $(TEST_REFERENCE)
 
-fuzz:
-	@$(ENV_SETUP) && export TCF_FUZZ=1 && $(BUSTED) $(BUSTED_FLAGS) $(TEST_DIR)
+# Fuzz tests
+test-fuzz:
+	@$(ENV_SETUP) && $(BUSTED) $(BUSTED_FLAGS) $(TEST_FUZZ)
 
 lint:
-	@$(ENV_SETUP) && $(LUACHECK) $(SRC_DIR) $(TEST_DIR)
+	@$(ENV_SETUP) && $(LUACHECK) $(SRC_DIR) $(TEST_UNITS) $(TEST_REFERENCE) $(TEST_FUZZ)
 
 format:
-	@$(STYLUA) $(SRC_DIR) $(TEST_DIR)
+	@$(STYLUA) $(SRC_DIR) $(TEST_UNITS) $(TEST_REFERENCE) $(TEST_FUZZ)
 
 check-format:
-	@$(STYLUA) --check $(SRC_DIR) $(TEST_DIR)
+	@$(STYLUA) --check $(SRC_DIR) $(TEST_UNITS) $(TEST_REFERENCE) $(TEST_FUZZ)
 
 coverage:
-	@$(ENV_SETUP) && $(BUSTED) $(BUSTED_FLAGS) --coverage $(TEST_DIR)
+	@$(ENV_SETUP) && $(BUSTED) $(BUSTED_FLAGS) --coverage $(TEST_UNITS)
 	@$(ENV_SETUP) && $(LUACOV)
-	@echo "Coverage report generated in luacov.report.out"
+	@echo "Coverage Summary:"
+	@grep -A 999 "Summary" luacov.report.out || cat luacov.report.out
 
 changelog:
 	$(GIT_CLIFF) -o CHANGELOG.md
