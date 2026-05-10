@@ -22,12 +22,36 @@ jobs:
       with:
         luaVersion: ${{ matrix.luaversion }}
 
-    - name: Run Tests
+    - uses: leafo/gh-actions-luarocks@v4
+
+    - name: Install Dev Dependencies
       run: |
-        export LUA_PATH="./?.lua;;"
-        # For now, run the plumbing test if it exists
-        if [ -f test/plumbing_spec.lua ]; then
-          lua test/plumbing_spec.lua
-        else
-          echo "No tests to run yet."
-        fi
+        luarocks install busted
+        luarocks install luacheck
+        luarocks install luacov
+        # StyLua is usually installed via a separate action, but we can check it later
+
+    - name: Run Linter (Luacheck)
+      run: make lint
+
+    - name: Run Tests & Coverage (Busted)
+      run: make coverage
+
+  release:
+    needs: test
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Create Release Artifacts
+      run: make dist
+      
+    - name: Upload Release Artifacts
+      uses: softprops/action-gh-release@v2
+      with:
+        files: |
+          lua-gdpr-iab-tcfv2-*.tar.gz
+          *.rockspec
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
