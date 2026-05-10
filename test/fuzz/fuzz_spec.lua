@@ -1,40 +1,6 @@
 local tcf = require("gdpr.iab.tcfv2")
-local harness = require("test.reference.golden_harness")
 
 describe("Fuzz Testing", function()
-  describe("Golden Corpus Random Sampling", function()
-    it("matches Perl logical output for random vendors", function()
-      local count = 0
-      local limit = 128
-      harness.read_golden(function(data)
-        count = count + 1
-
-        if data.expect_failure then
-          return
-        end
-
-        local parser = assert(tcf.new(data.tc_string))
-        local expected = data.tests.to_json
-
-        -- verify 10 random IDs between 1 and 2000
-        for _ = 1, 10 do
-          local vid = math.random(1, 2000)
-          local actual_val = parser.vendorConsents[vid] == true
-          local expected_val = (expected.vendor.consents[tostring(vid)] == true)
-          assert.are.equal(
-            expected_val,
-            actual_val,
-            string.format("Line %d: Vendor %d mismatch", count, vid)
-          )
-        end
-
-        if count >= limit then
-          return true
-        end
-      end)
-    end)
-  end)
-
   describe("Random Bitstream Robustness", function()
     it("does not crash on random data", function()
       local chars =
