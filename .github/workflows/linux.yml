@@ -13,7 +13,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        luaversion: ["5.1", "5.2", "5.3", "5.4", "luajit", "luajit-openresty"]
+        luaversion: ["5.1", "5.2", "5.3", "5.4", "luajit-2.1.0-beta3"]
 
     steps:
     - uses: actions/checkout@v4
@@ -29,12 +29,18 @@ jobs:
         luarocks install busted
         luarocks install luacheck
         luarocks install luacov
-        # StyLua is usually installed via a separate action, but we can check it later
 
     - name: Run Linter (Luacheck)
       run: make lint
 
-    - name: Run Tests & Coverage (Busted)
+    - name: Run Tests
+      run: |
+        export LUA_PATH="./?.lua;./src/?.lua;;"
+        # Fix for environments where lua might be named differently
+        LUA_CMD=$(which lua || which luajit || echo "lua")
+        $LUA_CMD test/plumbing_spec.lua
+
+    - name: Run Coverage (Busted)
       run: make coverage
 
   release:

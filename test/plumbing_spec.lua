@@ -36,6 +36,6 @@ print("Testing BitStream...")
 local bs = BitStream.new(decoded2)
 assert_eq(bs:read_int(6), 2, "read_int 1")
 assert_eq(bs:read_int(6), 14, "read_int 2")
-assert_eq(bs:read_int(4), 0, "read_int 3") -- The remaining 4 bits of 'w'
+assert_eq(bs:read_int(4), 12, "read_int 3") -- The high 4 bits of 'w' (110000)
 
 print("All plumbing tests passed!")
