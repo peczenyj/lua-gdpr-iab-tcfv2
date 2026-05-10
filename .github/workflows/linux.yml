@@ -42,7 +42,7 @@ jobs:
         luarocks install luacheck
         luarocks install luacov
 
-    - name: Run CI (Format Check, Lint, Test, Coverage)
+    - name: Run CI (Format Check, Lint, Test)
       run: |
         if [[ "${{ matrix.luaVersion }}" == "luajit"* ]]; then
           # Full corpus for JIT/OpenResty
