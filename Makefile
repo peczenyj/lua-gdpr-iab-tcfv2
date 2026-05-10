@@ -28,6 +28,13 @@ ENV_SETUP    = export LUA_PATH="$(ROCKS_LUA);./src/?.lua;./test/?.lua;./?.lua;;"
                export LUA_CPATH="$(ROCKS_CLUA);;" && \
                export PATH="$(ROCKS_BIN):$$PATH"
 
+# Verbose mode handling
+ifeq ($(TCF_VERBOSE), 1)
+  BUSTED_FLAGS = -o gtest
+else
+  BUSTED_FLAGS =
+endif
+
 .PHONY: all test lint format check-format coverage changelog dist install clean setup ci task
 
 all: test
@@ -51,7 +58,7 @@ task: format lint test
 	@echo "Development tasks completed successfully."
 
 test:
-	@$(ENV_SETUP) && $(BUSTED) $(TEST_DIR)
+	@$(ENV_SETUP) && $(BUSTED) $(BUSTED_FLAGS) $(TEST_DIR)
 
 lint:
 	@$(ENV_SETUP) && $(LUACHECK) $(SRC_DIR) $(TEST_DIR)
@@ -63,7 +70,7 @@ check-format:
 	@$(STYLUA) --check $(SRC_DIR) $(TEST_DIR)
 
 coverage:
-	@$(ENV_SETUP) && $(BUSTED) --coverage $(TEST_DIR)
+	@$(ENV_SETUP) && $(BUSTED) $(BUSTED_FLAGS) --coverage $(TEST_DIR)
 	@$(ENV_SETUP) && $(LUACOV)
 	@echo "Coverage report generated in luacov.report.out"
 

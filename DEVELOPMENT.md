@@ -1,0 +1,62 @@
+# Development Guide
+
+This document covers the technical setup, tooling, and configuration for developing `lua-gdpr-iab-tcfv2`.
+
+## Prerequisites
+
+Ensure you have the following installed on your system:
+
+1.  **Lua (5.1, 5.2, 5.3, 5.4, or LuaJIT)**:
+    - Ubuntu: `sudo apt install lua5.4`
+    - macOS: `brew install lua`
+2.  **LuaRocks**:
+    - Ubuntu: `sudo apt install luarocks`
+    - macOS: `brew install luarocks`
+3.  **StyLua** (Code Formatter):
+    - **Rust/Cargo**: `cargo install stylua`
+    - **macOS**: `brew install stylua`
+    - **Linux (Manual)**: Download from [StyLua Releases](https://github.com/JohnnyMorganz/StyLua/releases).
+
+## Local Setup
+
+Initialize the local dependencies folder (`.rocks/`):
+```bash
+make setup
+```
+This installs `busted`, `luacheck`, and `luacov` locally. The `Makefile` automatically detects and uses this folder.
+
+## Environment Variables
+
+The test suite behavior can be customized using the following environment variables:
+
+| Variable | Description | Default |
+| :--- | :--- | :--- |
+| `TCF_VERBOSE` | Set to `1` to enable verbose output (`-o gtest`) and show real-time Golden Corpus progress. | `0` |
+| `TCF_FULL_CORPUS` | Set to `1` to perform a full recursive deep-comparison on the entire Golden Corpus. | `0` |
+| `TCF_DEEP_LIMIT` | Number of entries at the start of the file to deep-compare. | `16` |
+| `TCF_SCAN_LIMIT` | Total number of lines to read from the Golden File in standard mode. | `100` |
+| `LUA_VERSION` | Manually specify the Lua version (e.g., `5.1`, `5.4`). | *Auto-detected* |
+| `LUA_BIN` | Path to the Lua executable. | `lua` |
+
+### Examples
+
+**Run standard tests with verbose progress:**
+```bash
+TCF_VERBOSE=1 make test
+```
+
+**Perform an exhaustive deep scan of the entire corpus:**
+```bash
+TCF_FULL_CORPUS=1 TCF_VERBOSE=1 make test
+```
+
+## Makefile Targets
+
+- `make setup`: Initialize local LuaRocks dependencies.
+- `make task`: Development loop (Format + Lint + Test).
+- `make ci`: CI verification (Verify Format + Lint + Test + Coverage).
+- `make test`: Run the test suite (Busted).
+- `make lint`: Run the linter (Luacheck).
+- `make format`: Apply code formatting (StyLua).
+- `make check-format`: Verify formatting without changing files.
+- `make coverage`: Generate a coverage report (Luacov).

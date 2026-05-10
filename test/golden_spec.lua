@@ -4,14 +4,40 @@ local tcf = require("gdpr.iab.tcfv2")
 
 -- Environment configuration
 local FULL_CORPUS = os.getenv("TCF_FULL_CORPUS") == "1"
-local DEEP_LIMIT = tonumber(os.getenv("TCF_DEEP_LIMIT")) or 16
-local SCAN_LIMIT = tonumber(os.getenv("TCF_SCAN_LIMIT")) or 100
+local VERBOSE = os.getenv("TCF_VERBOSE") == "1"
+
+-- Robust Limit Handling
+local function get_limit(env_var, default)
+  local val = tonumber(os.getenv(env_var))
+  if not val or val < 0 then
+    return default
+  end
+  return val
+end
+
+local DEEP_LIMIT = get_limit("TCF_DEEP_LIMIT", 16)
+local SCAN_LIMIT = get_limit("TCF_SCAN_LIMIT", 100)
+
+-- Ensure logic remains sound if user provides small scan limit but large deep limit
+if DEEP_LIMIT > SCAN_LIMIT and not FULL_CORPUS then
+  SCAN_LIMIT = DEEP_LIMIT
+end
 
 describe("Golden Parity", function()
   it("matches Perl logical output", function()
     local count = 0
     harness.read_golden(function(data)
       count = count + 1
+
+      if VERBOSE then
+        print(
+          string.format(
+            "  -> Processing line %d (%s...)",
+            count,
+            data.tc_string:sub(1, 20)
+          )
+        )
+      end
 
       if data.expect_failure then
         return
@@ -36,11 +62,7 @@ describe("Golden Parity", function()
         local ok, diff_err = parity.deep_compare(actual, expected)
         assert.is_true(
           ok,
-          string.format(
-            "Deep mismatch at line %d: %s",
-            count,
-            tostring(diff_err)
-          )
+          string.format("Deep mismatch at line %d: %s", count, tostring(diff_err))
         )
       end
 
@@ -54,7 +76,6 @@ describe("Golden Parity", function()
         assert.are.equal(expected.policy_version, parser.policyVersion)
 
         -- verify a random subset of vendor consents
-        -- we pick 5 random IDs between 1 and 2000
         for _ = 1, 5 do
           local vid = math.random(1, 2000)
           local actual_val = parser.vendorConsents[vid] == true
