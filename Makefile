@@ -51,10 +51,10 @@ setup:
 	@echo "Note: 'stylua' must be installed manually (see CONTRIBUTING.md)"
 	@echo "The Makefile will now automatically use them for 'make test', 'make lint', etc."
 
-ci: check-format lint test coverage
+ci: check-format lint coverage
 	@echo "CI check passed successfully."
 
-task: format lint test
+task: format lint test-quick
 	@echo "Development tasks completed successfully."
 
 test:
