@@ -21,7 +21,7 @@ print("Testing Base64url...")
 -- 'A' is 000000 in 6-bit. 'B' is 000001.
 -- 'AB' -> 000000 000001 -> 00000000 0001....
 -- 00000000 is 0. 00010000 is 16.
-local decoded, err = base64.decode_url("AB")
+local decoded = base64.decode_url("AB")
 assert_eq(decoded:sub(1,1), string.char(0), "base64 decode 1")
 
 -- TCF test string snippet: 'COw'
@@ -36,6 +36,6 @@ print("Testing BitStream...")
 local bs = BitStream.new(decoded2)
 assert_eq(bs:read_int(6), 2, "read_int 1")
 assert_eq(bs:read_int(6), 14, "read_int 2")
-assert_eq(bs:read_int(4), 0, "read_int 3") -- The remaining 4 bits of 'w'
+assert_eq(bs:read_int(4), 12, "read_int 3") -- The high 4 bits of 'w' (110000)
 
 print("All plumbing tests passed!")

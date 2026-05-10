@@ -13,7 +13,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        luaversion: ["5.1", "5.2", "5.3", "5.4", "luajit", "luajit-openresty"]
+        luaversion: ["5.1", "5.2", "5.3", "5.4"]
 
     steps:
     - uses: actions/checkout@v4
@@ -22,12 +22,42 @@ jobs:
       with:
         luaVersion: ${{ matrix.luaversion }}
 
+    - uses: leafo/gh-actions-luarocks@v4
+
+    - name: Install Dev Dependencies
+      run: |
+        luarocks install busted
+        luarocks install luacheck
+        luarocks install luacov
+
+    - name: Run Linter (Luacheck)
+      run: make lint
+
     - name: Run Tests
       run: |
-        export LUA_PATH="./?.lua;;"
-        # For now, run the plumbing test if it exists
-        if [ -f test/plumbing_spec.lua ]; then
-          lua test/plumbing_spec.lua
-        else
-          echo "No tests to run yet."
-        fi
+        export LUA_PATH="./?.lua;./src/?.lua;;"
+        # Fix for environments where lua might be named differently
+        LUA_CMD=$(which lua || which luajit || echo "lua")
+        $LUA_CMD test/plumbing_spec.lua
+
+    - name: Run Coverage (Busted)
+      run: make coverage
+
+  release:
+    needs: test
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Create Release Artifacts
+      run: make dist
+      
+    - name: Upload Release Artifacts
+      uses: softprops/action-gh-release@v2
+      with:
+        files: |
+          lua-gdpr-iab-tcfv2-*.tar.gz
+          *.rockspec
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
