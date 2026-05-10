@@ -33,6 +33,7 @@ The test suite behavior can be customized using the following environment variab
 | :--- | :--- | :--- |
 | `TCF_VERBOSE` | Set to `1` to enable verbose output (`-o gtest`) and show real-time Golden Corpus progress. | `0` |
 | `TCF_FULL_CORPUS` | Set to `1` to perform a full recursive deep-comparison on the entire Golden Corpus. | `0` |
+| `TCF_CONTINUE_ON_FAILURE` | Set to `1` to collect all corpus mismatches and report them at the end instead of stopping at the first error. | `0` |
 | `TCF_DEEP_LIMIT` | Number of entries at the start of the file to deep-compare. | `16` |
 | `TCF_SCAN_LIMIT` | Total number of lines to read from the Golden File in standard mode. | `100` |
 | `LUA_VERSION` | Manually specify the Lua version (e.g., `5.1`, `5.4`). | *Auto-detected* |
@@ -45,9 +46,9 @@ The test suite behavior can be customized using the following environment variab
 TCF_VERBOSE=1 make test
 ```
 
-**Perform an exhaustive deep scan of the entire corpus:**
+**Perform an exhaustive deep scan of the entire corpus, reporting all errors:**
 ```bash
-TCF_FULL_CORPUS=1 TCF_VERBOSE=1 make test
+TCF_FULL_CORPUS=1 TCF_VERBOSE=1 TCF_CONTINUE_ON_FAILURE=1 make test
 ```
 
 ## Makefile Targets

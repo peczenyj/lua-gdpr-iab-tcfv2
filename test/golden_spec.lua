@@ -5,6 +5,7 @@ local tcf = require("gdpr.iab.tcfv2")
 -- Environment configuration
 local FULL_CORPUS = os.getenv("TCF_FULL_CORPUS") == "1"
 local VERBOSE = os.getenv("TCF_VERBOSE") == "1"
+local CONTINUE_ON_FAILURE = os.getenv("TCF_CONTINUE_ON_FAILURE") == "1"
 
 -- Robust Limit Handling
 local function get_limit(env_var, default)
@@ -26,6 +27,9 @@ end
 describe("Golden Parity", function()
   it("matches Perl logical output", function()
     local count = 0
+    local failures = {}
+    local filename = harness.get_golden_path()
+
     harness.read_golden(function(data)
       count = count + 1
 
@@ -43,62 +47,60 @@ describe("Golden Parity", function()
         return
       end
 
-      local parser, err = tcf.new(data.tc_string)
-      if not parser then
-        error(
-          string.format(
-            "Line %d: Failed to parse %s: %s",
-            count,
-            data.tc_string,
-            tostring(err)
-          )
-        )
-      end
-
-      -- 1. Full Deep Comparison for the first X items
-      if count <= DEEP_LIMIT or FULL_CORPUS then
-        -- Pass the parser object itself to parity helper to handle lazy loading
-        local actual = parity.map_to_perl_shape(parser)
-        local expected = data.tests.to_json
-        local ok, diff_err = parity.deep_compare(actual, expected)
-
-        if not ok then
-          print("\n--- ASSERTION FAILURE ---")
-          print(string.format("Line: %d", count))
-          print(string.format("TC String: %s", data.tc_string))
-          print(string.format("Error: %s", tostring(diff_err)))
-          print("-------------------------\n")
+      -- Wrap the actual test logic in a pcall to handle continue-on-failure
+      local status, err = pcall(function()
+        local parser, p_err = tcf.new(data.tc_string)
+        if not parser then
+          error(string.format("Failed to parse: %s", tostring(p_err)))
         end
 
-        assert.is_true(
-          ok,
-          string.format(
-            "Deep mismatch at line %d: %s",
-            count,
-            tostring(diff_err)
-          )
-        )
-      end
+        -- 1. Full Deep Comparison for the first X items
+        if count <= DEEP_LIMIT or FULL_CORPUS then
+          local actual = parity.map_to_perl_shape(parser)
+          local expected = data.tests.to_json
+          local ok, diff_err = parity.deep_compare(actual, expected)
 
-      -- 2. Randomized Fuzz/Sampling for other items (if not doing full corpus)
-      if count > DEEP_LIMIT and not FULL_CORPUS then
-        local expected = data.tests.to_json
+          if not ok then
+            error(tostring(diff_err))
+          end
+        end
 
-        -- Verify Header Parity (Cheap)
-        assert.are.equal(expected.version, parser.version)
-        assert.are.equal(expected.cmp_id, parser.cmpId)
-        assert.are.equal(expected.policy_version, parser.policyVersion)
+        -- 2. Randomized Fuzz/Sampling for other items (if not doing full corpus)
+        if count > DEEP_LIMIT and not FULL_CORPUS then
+          local expected = data.tests.to_json
 
-        -- verify a random subset of vendor consents
-        for _ = 1, 5 do
-          local vid = math.random(1, 2000)
-          local actual_val = parser.vendorConsents[vid] == true
-          local expected_val = (expected.vendor.consents[tostring(vid)] == true)
-          assert.are.equal(
-            expected_val,
-            actual_val,
-            string.format("Fuzz mismatch: Vendor %d at line %d", vid, count)
-          )
+          -- Verify Header Parity (Cheap)
+          assert.are.equal(expected.version, parser.version)
+          assert.are.equal(expected.cmp_id, parser.cmpId)
+          assert.are.equal(expected.policy_version, parser.policyVersion)
+
+          -- verify a random subset of vendor consents
+          for _ = 1, 5 do
+            local vid = math.random(1, 2000)
+            local actual_val = parser.vendorConsents[vid] == true
+            local expected_val = (
+              expected.vendor.consents[tostring(vid)] == true
+            )
+            assert.are.equal(
+              expected_val,
+              actual_val,
+              string.format("Vendor %d mismatch", vid)
+            )
+          end
+        end
+      end)
+
+      if not status then
+        local failure_msg =
+          string.format("[%s:%d] %s", filename, count, tostring(err))
+        if CONTINUE_ON_FAILURE then
+          table.insert(failures, failure_msg)
+          -- Print immediate feedback in verbose mode even if continuing
+          if VERBOSE then
+            print("     !! FAILURE: " .. failure_msg)
+          end
+        else
+          error(failure_msg)
         end
       end
 
@@ -107,5 +109,19 @@ describe("Golden Parity", function()
         return true -- Stop reading file
       end
     end)
+
+    if #failures > 0 then
+      local error_blob = table.concat(failures, "\n")
+      -- Limit output size if there are too many failures
+      if #failures > 20 then
+        error_blob = table.concat(failures, "\n", 1, 20)
+          .. "\n... (Total "
+          .. #failures
+          .. " failures)"
+      end
+      error(
+        "Corpus Parity Failed with " .. #failures .. " errors:\n" .. error_blob
+      )
+    end
   end)
 end)
