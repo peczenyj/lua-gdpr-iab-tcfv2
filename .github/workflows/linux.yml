@@ -8,21 +8,25 @@ on:
 
 jobs:
   test:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
 
     strategy:
       fail-fast: false
       matrix:
-        luaversion: ["5.1", "5.2", "5.3", "5.4", "luajit"]
+        luaVersion: ["5.4", "5.3", "5.2", "5.1", "luajit", "luajit-openresty"]
 
     steps:
     - uses: actions/checkout@v4
     
-    - uses: leafo/gh-actions-lua@v10
+    - name: Setup Lua
+      uses: hishamhm/gh-actions-lua@master
       with:
-        luaVersion: ${{ matrix.luaversion }}
+        luaVersion: ${{ matrix.luaVersion }}
 
-    - uses: leafo/gh-actions-luarocks@v4
+    - name: Setup LuaRocks
+      uses: hishamhm/gh-actions-luarocks@master
+      with:
+        luaRocksVersion: "3.13.0"
 
     - name: Install StyLua
       run: |
@@ -34,18 +38,13 @@ jobs:
 
     - name: Install Dev Dependencies
       run: |
-        # Help LuaRocks find the correct manifest for 5.1/luajit
-        LV="${{ matrix.luaversion }}"
-        if [ "$LV" == "luajit" ]; then
-           LV="5.1"
-        fi
-        luarocks install --lua-version $LV busted
-        luarocks install --lua-version $LV luacheck
-        luarocks install --lua-version $LV luacov
+        luarocks install busted
+        luarocks install luacheck
+        luarocks install luacov
 
     - name: Run CI (Format Check, Lint, Test, Coverage)
       run: |
-        if [ "${{ matrix.luaversion }}" == "luajit" ]; then
+        if [[ "${{ matrix.luaVersion }}" == "luajit"* ]]; then
           make ci LUA_BIN=luajit
         else
           make ci
