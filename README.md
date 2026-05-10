@@ -4,6 +4,7 @@
 [![Linter](https://img.shields.io/badge/linter-luacheck-blue)](https://github.com/lunarmodules/luacheck)
 [![Style](https://img.shields.io/badge/style-stylua-blueviolet)](https://github.com/JohnnyMorganz/StyLua)
 [![License](https://img.shields.io/github/license/peczenyj/lua-gdpr-iab-tcfv2)](LICENSE)
+[![Coverage Status](https://coveralls.io/repos/github/peczenyj/lua-gdpr-iab-tcfv2/badge.svg)](https://coveralls.io/github/peczenyj/lua-gdpr-iab-tcfv2)
 
 A high-performance, zero-dependency, version-agnostic Lua parser for IAB TCF v2.x consent strings.
 
