@@ -24,20 +24,22 @@ jobs:
 
     - uses: leafo/gh-actions-luarocks@v4
 
+    - name: Install StyLua
+      run: |
+        STYLUA_VERSION=v0.20.0
+        wget https://github.com/JohnnyMorganz/StyLua/releases/download/${STYLUA_VERSION}/stylua-linux-x86_64.zip
+        unzip stylua-linux-x86_64.zip
+        chmod +x stylua
+        sudo mv stylua /usr/local/bin/
+
     - name: Install Dev Dependencies
       run: |
         luarocks install busted
         luarocks install luacheck
         luarocks install luacov
 
-    - name: Run Linter (Luacheck)
-      run: make lint
-
-    - name: Run Tests
-      run: make test
-
-    - name: Run Coverage
-      run: make coverage
+    - name: Run CI (Format Check, Lint, Test, Coverage)
+      run: make ci
 
   release:
     needs: test
