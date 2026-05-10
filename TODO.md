@@ -15,34 +15,34 @@ A zero-dependency, JIT-optimized Lua parser for IAB TCF v2.x.
 
 ## 3. Development Phases
 
-### Phase 0: Setup & Social
-- [ ] Create `LICENSE` (MIT), `CONTRIBUTING.md`, `SECURITY.md`, `CODE_OF_CONDUCT.md`.
-- [ ] Create `Makefile` with targets: `test`, `lint`, `format`, `coverage`, `changelog`, `dist`.
-- [ ] Create `cliff.toml` (adapted from Perl).
-- [ ] Create `.luacheckrc` and `.stylua.toml`.
-- [ ] Finalize GitHub Actions (Linux matrix: 5.1, 5.2, 5.3, 5.4, LuaJIT, OpenResty).
-- [ ] Add `.rockspec` template for Luarocks.
+### Phase 0: Setup & Social [DONE]
+- [x] Create `LICENSE` (MIT), `CONTRIBUTING.md`, `SECURITY.md`, `CODE_OF_CONDUCT.md`.
+- [x] Create `Makefile` with targets: `test`, `lint`, `format`, `coverage`, `changelog`, `dist`.
+- [x] Create `cliff.toml` (adapted from Perl).
+- [x] Create `.luacheckrc` and `.stylua.toml`.
+- [x] Finalize GitHub Actions (Linux matrix: 5.1, 5.2, 5.3, 5.4).
+- [x] Add `.rockspec` template for Luarocks.
 
-### Phase 1: Foundation (Plumbing)
-- [ ] Implement `src/base64.lua` (zero-dependency).
-- [ ] Implement `src/bit.lua` (version-agnostic bridge).
-- [ ] Implement `src/bitstream.lua` (high-performance reader).
-- [ ] **Golden Harness**: Setup `test/corpus/` with Perl's `golden.jsonl` and a minimal JSON reader for verification.
+### Phase 1: Foundation (Plumbing) [DONE]
+- [x] Implement `src/gdpr/iab/tcfv2/base64.lua` (zero-dependency).
+- [x] Implement `src/gdpr/iab/tcfv2/bit.lua` (version-agnostic bridge).
+- [x] Implement `src/gdpr/iab/tcfv2/bitstream.lua` (high-performance reader).
+- [x] **Golden Harness**: Setup `test/corpus/` with Perl's `golden.jsonl` (uncompressed) and a minimal JSON reader for verification.
 
-### Phase 2: Core Segment & Lazy Infrastructure
-- [ ] Implement `src/core.lua` with metatable-based lazy decoding.
-- [ ] Implement BitField and RangeSection decoders with internal caching.
-- [ ] Implement `src/constants/` (Purpose, SpecialFeature, RestrictionType) as bi-directional tables.
-- [ ] Implement `strict` vs `lenient` mode and `targetVendors` optimization.
-- [ ] Map all fields to **CamelCase** (matching GVL/JSON).
+### Phase 2: Core Segment & Lazy Infrastructure [DONE]
+- [x] Implement `src/gdpr/iab/tcfv2/core.lua` with metatable-based lazy decoding.
+- [x] Implement BitField and RangeSection decoders with internal caching.
+- [x] Implement `src/gdpr/iab/tcfv2/constants/` (Purpose, SpecialFeature, RestrictionType) as bi-directional tables.
+- [x] Implement `strict` vs `lenient` mode and `targetVendors` optimization.
+- [x] Map all fields to **CamelCase** (matching GVL/JSON).
 
 ### Phase 3: Multi-Segment Router
-- [ ] Implement `src/router.lua` to handle `.` splitting.
+- [ ] Implement `src/gdpr/iab/tcfv2/router.lua` to handle `.` splitting.
 - [ ] Route Type 1 (Disclosed), Type 2 (Allowed), Type 3 (Pub TC).
 
 ### Phase 4: Validator & Documentation
-- [ ] Implement `src/validator.lua` as a separate policy engine.
-- [ ] Finalize `src/init.lua` public API.
+- [ ] Implement `src/gdpr/iab/tcfv2/validator.lua` as a separate policy engine.
+- [ ] Finalize `src/gdpr/iab/tcfv2/init.lua` public API.
 - [ ] Complete LDoc annotations for all public tables and methods.
 - [ ] Create `README.md` with Middleware Recipes (OpenResty/HAProxy).
 
@@ -56,3 +56,4 @@ A zero-dependency, JIT-optimized Lua parser for IAB TCF v2.x.
 2. **Bitwise Fallback**: For Lua 5.1 (non-JIT), we will use a pure-Lua math-based fallback. It's slower but ensures the library works everywhere.
 3. **Vendor IDs**: Lua tables are 1-indexed. We will store vendor permissions in a table where `vendorConsents[284] = true` for direct O(1) lookups.
 4. **Dates**: We will return integers (Deciseconds since epoch) to match the spec and the Perl Golden File exactly.
+5. **Corpus Size**: Use uncompressed `golden.jsonl` for simplicity in PR 2/3. Consider future compression (e.g. pure-Lua DEFLATE) or binary formats to reduce git pressure.
