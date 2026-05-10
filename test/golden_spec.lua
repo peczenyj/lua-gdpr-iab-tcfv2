@@ -6,8 +6,8 @@ describe("Golden Harness", function()
     harness.read_golden(function(data)
       count = count + 1
       if count == 1 then
-        assert.is_not.nil(data.tc_string)
-        assert.is_not.nil(data.tests)
+        assert.is_not_nil(data.tc_string)
+        assert.is_not_nil(data.tests)
       end
     end)
     assert.is_true(count > 0)
