@@ -56,3 +56,4 @@ A zero-dependency, JIT-optimized Lua parser for IAB TCF v2.x.
 2. **Bitwise Fallback**: For Lua 5.1 (non-JIT), we will use a pure-Lua math-based fallback. It's slower but ensures the library works everywhere.
 3. **Vendor IDs**: Lua tables are 1-indexed. We will store vendor permissions in a table where `vendorConsents[284] = true` for direct O(1) lookups.
 4. **Dates**: We will return integers (Deciseconds since epoch) to match the spec and the Perl Golden File exactly.
+5. **Corpus Size**: Consider future compression (e.g. pure-Lua DEFLATE) or binary formats to reduce git pressure from the uncompressed golden file.
