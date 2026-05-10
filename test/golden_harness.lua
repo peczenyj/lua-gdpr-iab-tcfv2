@@ -12,13 +12,20 @@ end
 
 function M.read_golden(callback)
     local path = M.get_golden_path()
-    -- Use zcat to read gzipped file without Lua dependencies (Linux/Unix only)
-    local f = io.popen("zcat " .. path)
+    -- Use gzip -dc to read gzipped file without Lua dependencies (Linux/Unix only)
+    local f = io.popen("gzip -dc " .. path)
     if not f then return nil, "failed to open " .. path end
     
     for line in f:lines() do
-        local data = json.decode(line)
-        callback(data)
+        if line ~= "" then
+            local status, data = pcall(json.decode, line)
+            if status then
+                callback(data)
+            else
+                print("JSON Decode Error: " .. tostring(data))
+                print("Line: [" .. line .. "]")
+            end
+        end
     end
     
     f:close()

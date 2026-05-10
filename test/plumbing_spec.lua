@@ -24,7 +24,7 @@ describe("Plumbing", function()
   describe("Base64url", function()
     it("decodes simple strings", function()
       local decoded = base64.decode_url("AB")
-      assert.are.equal(string.char(0) .. string.char(16), decoded)
+      assert.are.equal(string.char(0), decoded)
     end)
 
     it("decodes TCF header snippet", function()

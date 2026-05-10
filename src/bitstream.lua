@@ -44,7 +44,7 @@ function BitStream:read_int(bits)
 end
 
 function BitStream:read_bool()
-    local val, err = self.read_int(1)
+    local val, err = self:read_int(1)
     if err then return nil, err end
     return val == 1
 end
@@ -55,7 +55,7 @@ end
 
 function BitStream:peek_int(bits)
     local old_pos = self.bit_pos
-    local val, err = self.read_int(bits)
+    local val, err = self:read_int(bits)
     self.bit_pos = old_pos
     return val, err
 end
