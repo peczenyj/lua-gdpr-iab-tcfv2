@@ -19,7 +19,6 @@ dependencies = {
 test_dependencies = {
    "busted",
    "luacheck",
-   "stylua",
    "luacov"
 }
 build = {
@@ -30,4 +29,7 @@ build = {
       ["gdpr.iab.tcfv2.base64"] = "src/base64.lua",
       ["gdpr.iab.tcfv2.bitstream"] = "src/bitstream.lua"
    }
+}
+test = {
+   type = "busted"
 }

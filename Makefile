@@ -36,7 +36,10 @@ setup:
 	@echo "Detected Lua version: $(LUA_VERSION)"
 	@echo "Installing development and test dependencies..."
 	$(LUAROCKS) install --only-deps --tree $(ROCKS_PATH) *.rockspec
-	$(LUAROCKS) test --only-deps --tree $(ROCKS_PATH) *.rockspec
+	@# Manual install of test dependencies to avoid LuaRocks bugs and missing rockspec fields
+	$(LUAROCKS) install busted --tree $(ROCKS_PATH)
+	$(LUAROCKS) install luacheck --tree $(ROCKS_PATH)
+	$(LUAROCKS) install luacov --tree $(ROCKS_PATH)
 	@echo "Dependencies installed in $(ROCKS_PATH)/"
 	@echo "The Makefile will now automatically use them for 'make test', 'make lint', etc."
 
