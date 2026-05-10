@@ -5,6 +5,8 @@ describe("Fuzz Testing", function()
   describe("Golden Corpus Random Sampling", function()
     it("matches Perl logical output for random vendors", function()
       local count = 0
+      -- We only perform random sampling on the first 128 lines
+      -- because they are the only ones guaranteed to have 'to_json' data.
       local limit = 128
       harness.read_golden(function(data)
         count = count + 1
