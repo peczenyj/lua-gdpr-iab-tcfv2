@@ -16,6 +16,91 @@ local function get_parser(tc_string_or_obj, options)
   return tcf.new(tc_string_or_obj, options)
 end
 
+local function is_in_table(val, tbl)
+  if not tbl then
+    return false
+  end
+  for _, v in ipairs(tbl) do
+    if v == val then
+      return true
+    end
+  end
+  return false
+end
+
+function Validator:is_vendor_consent_allowed(parser, vendor_id, purpose_id)
+  if not parser.vendorConsents[vendor_id] then
+    return false, string.format("missing consent for vendor %d", vendor_id)
+  end
+  if not parser.purposeConsents[purpose_id] then
+    return false, string.format("missing consent for purpose %d", purpose_id)
+  end
+
+  -- Publisher Restrictions shape: [purpose_id][vendor_id] = restriction_type
+  local rest = parser.publisherRestrictions[purpose_id]
+  if rest and rest[vendor_id] then
+    local r_type = rest[vendor_id]
+    if r_type == 0 then
+      return false,
+        string.format(
+          "purpose %d is restricted for vendor %d",
+          purpose_id,
+          vendor_id
+        )
+    end
+    if r_type == 2 then
+      return false,
+        string.format(
+          "purpose %d requires legitimate interest for vendor %d",
+          purpose_id,
+          vendor_id
+        )
+    end
+  end
+  return true
+end
+
+function Validator:is_vendor_legitimate_interest_allowed(
+  parser,
+  vendor_id,
+  purpose_id
+)
+  if purpose_id == 1 then
+    return false, "purpose 1 does not allow legitimate interest"
+  end
+  if not parser.vendorLegitimateInterests[vendor_id] then
+    return false,
+      string.format("missing legitimate interest for vendor %d", vendor_id)
+  end
+  if not parser.purposeLegitimateInterests[purpose_id] then
+    return false,
+      string.format("missing legitimate interest for purpose %d", purpose_id)
+  end
+
+  -- Publisher Restrictions shape: [purpose_id][vendor_id] = restriction_type
+  local rest = parser.publisherRestrictions[purpose_id]
+  if rest and rest[vendor_id] then
+    local r_type = rest[vendor_id]
+    if r_type == 0 then
+      return false,
+        string.format(
+          "purpose %d is restricted for vendor %d",
+          purpose_id,
+          vendor_id
+        )
+    end
+    if r_type == 1 then
+      return false,
+        string.format(
+          "purpose %d requires consent for vendor %d",
+          purpose_id,
+          vendor_id
+        )
+    end
+  end
+  return true
+end
+
 function Validator:validate(tc_string_or_obj, overrides)
   local conf = self.config
   if overrides then
@@ -48,23 +133,27 @@ function Validator:validate(tc_string_or_obj, overrides)
 
   -- 2. Consent Purpose Checks
   if conf.consent_purpose_ids then
-    -- Per Perl logic: first check if Vendor has consent at all
-    if not parser.vendorConsents[vendor_id] then
-      return false, string.format("missing consent for vendor %d", vendor_id)
-    end
-
     for _, pid in ipairs(conf.consent_purpose_ids) do
-      if not parser.purposeConsents[pid] then
-        return false, string.format("missing consent for purpose %d", pid)
+      local ok, v_err
+      -- If flexible, we might switch to LI if restricted to Require LI (Type 2)
+      local rest = parser.publisherRestrictions[pid]
+      if
+        is_in_table(pid, conf.flexible_purpose_ids)
+        and rest
+        and rest[vendor_id] == 2
+      then
+        ok, v_err =
+          self:is_vendor_legitimate_interest_allowed(parser, vendor_id, pid)
+      else
+        ok, v_err = self:is_vendor_consent_allowed(parser, vendor_id, pid)
       end
-      -- Check Publisher Restrictions (Type 0 = Not Allowed)
-      local rest = parser.publisherRestrictions[vendor_id]
-      if rest and rest[pid] and rest[pid][0] then
+
+      if not ok then
         return false,
-          string.format(
-            "purpose %d is restricted for vendor %d",
-            pid,
-            vendor_id
+          v_err or string.format(
+            "vendor %d not allowed for purpose %d (consent)",
+            vendor_id,
+            pid
           )
       end
     end
@@ -72,19 +161,28 @@ function Validator:validate(tc_string_or_obj, overrides)
 
   -- 3. Legitimate Interest Checks
   if conf.legitimate_interest_purpose_ids then
-    if not parser.vendorLegitimateInterests[vendor_id] then
-      return false,
-        string.format("missing legitimate interest for vendor %d", vendor_id)
-    end
-
     for _, pid in ipairs(conf.legitimate_interest_purpose_ids) do
-      -- Purpose 1 never allows LI
-      if pid == 1 then
-        return false, "purpose 1 does not allow legitimate interest"
+      local ok, v_err
+      -- If flexible, we might switch to Consent if restricted to Require Consent (Type 1)
+      local rest = parser.publisherRestrictions[pid]
+      if
+        is_in_table(pid, conf.flexible_purpose_ids)
+        and rest
+        and rest[vendor_id] == 1
+      then
+        ok, v_err = self:is_vendor_consent_allowed(parser, vendor_id, pid)
+      else
+        ok, v_err =
+          self:is_vendor_legitimate_interest_allowed(parser, vendor_id, pid)
       end
-      if not parser.purposeLegitimateInterests[pid] then
+
+      if not ok then
         return false,
-          string.format("missing legitimate interest for purpose %d", pid)
+          v_err or string.format(
+            "vendor %d not allowed for purpose %d (li)",
+            vendor_id,
+            pid
+          )
       end
     end
   end
