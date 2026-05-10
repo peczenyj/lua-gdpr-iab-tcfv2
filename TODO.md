@@ -48,10 +48,11 @@ A zero-dependency, JIT-optimized Lua parser for IAB TCF v2.x.
 - [x] Create `README.md` with Middleware Recipes (OpenResty/HAProxy).
 
 
-### Phase 5: Exhaustive Verification
-- [ ] Run full Golden Corpus suite (Verify MD5 consistency).
-- [ ] Implement `TCF_CONTINUE_ON_FAILURE` for bulk error reporting.
-- [ ] Configure CI for Full Scan on stable/high-performance versions (5.5, LuaJIT).
+### Phase 5: Exhaustive Verification [DONE]
+- [x] Run full Golden Corpus suite (Verify MD5 consistency).
+- [x] Implement `TCF_CONTINUE_ON_FAILURE` for bulk error reporting.
+- [x] Configure CI for Full Scan on stable/high-performance versions (5.5, LuaJIT).
+
 
 ### Phase 6: Performance & Platform
 - [ ] Implement `bench/` suite (Throughput, Latency, Memory churn).
