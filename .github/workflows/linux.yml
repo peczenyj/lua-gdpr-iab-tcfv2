@@ -41,18 +41,24 @@ jobs:
         luarocks install busted
         luarocks install luacheck
         luarocks install luacov
+        luarocks install luacov-coveralls
 
-    - name: Run CI
+    - name: Run CI (Format Check, Lint, Test)
       run: |
-        # All versions run unit tests and fuzzing
-        # Full reference scan only on JIT
         if [[ "${{ matrix.luaVersion }}" == "luajit"* ]]; then
           make ci LUA_BIN=luajit
         else
-          # PUC-Rio Lua runs units, fuzz (128 entries), and quick reference scan (128 entries)
-          make check-format lint test test-fuzz
-          make test-reference BUSTED="TCF_QUICK=1 busted"
+          make ci
         fi
+
+    - name: Report Coverage
+      if: success()
+      run: |
+        # We run unit tests with coverage and report
+        make coverage
+        make report-coverage
+      env:
+        COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
 
     - name: Verify Rockspec
       run: |

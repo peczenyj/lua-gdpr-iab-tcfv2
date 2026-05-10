@@ -28,7 +28,7 @@ ROCKS_CLUA   = $(ROCKS_PATH)/lib/lua/$(LUA_VERSION)/?.so
 ROCKS_BIN    = $(ROCKS_PATH)/bin
 
 # Environment setup for local dependencies
-ENV_SETUP    = export LUA_PATH="$(ROCKS_LUA);./src/?.lua;./?.lua;;" && \
+ENV_SETUP    = export LUA_PATH="$(ROCKS_LUA);./src/?.lua;./test/?.lua;./?.lua;;" && \
                export LUA_CPATH="$(ROCKS_CLUA);;" && \
                export PATH="$(ROCKS_BIN):$$PATH"
 
@@ -39,7 +39,7 @@ else
   BUSTED_FLAGS =
 endif
 
-.PHONY: all test test-reference test-fuzz lint format check-format coverage changelog dist install clean setup ci task
+.PHONY: all test test-reference test-fuzz lint format check-format coverage report-coverage changelog dist install clean setup ci task
 
 all: test
 
@@ -51,6 +51,7 @@ setup:
 	$(LUAROCKS) install busted --tree $(ROCKS_PATH)
 	$(LUAROCKS) install luacheck --tree $(ROCKS_PATH)
 	$(LUAROCKS) install luacov --tree $(ROCKS_PATH)
+	$(LUAROCKS) install luacov-coveralls --tree $(ROCKS_PATH)
 	@echo "Dependencies installed in $(ROCKS_PATH)/"
 	@echo "Note: 'stylua' must be installed manually (see DEVELOPMENT.md)"
 
@@ -88,6 +89,9 @@ coverage:
 	@$(ENV_SETUP) && $(LUACOV)
 	@echo "Coverage Summary:"
 	@grep -A 999 "Summary" luacov.report.out || cat luacov.report.out
+
+report-coverage:
+	@$(ENV_SETUP) && luacov-coveralls -i src
 
 changelog:
 	$(GIT_CLIFF) -o CHANGELOG.md

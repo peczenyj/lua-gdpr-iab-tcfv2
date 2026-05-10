@@ -19,7 +19,8 @@ dependencies = {
 test_dependencies = {
    "busted",
    "luacheck",
-   "luacov"
+   "luacov",
+   "luacov-coveralls"
 }
 build = {
    type = "builtin",
