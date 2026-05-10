@@ -7,7 +7,6 @@ end
 
 -- Perl JSON output only includes true values for vendor/purpose bitfields.
 -- We filter out false values to match that shape exactly.
--- Restrictions use numeric values (1, 2, 3).
 local function clean_table_to_perl_shape(t)
   if type(t) ~= "table" then
     return t
@@ -23,19 +22,18 @@ local function clean_table_to_perl_shape(t)
       has_data = true
     elseif type(v) == "table" then
       local cleaned = clean_table_to_perl_shape(v)
-      if cleaned and next(cleaned) ~= nil then
+      if cleaned then
         res[tostring(k)] = cleaned
         has_data = true
       end
     end
   end
-  if not has_data then
-    return nil
-  end
-  return res
+  return has_data and res or nil
 end
 
 function M.map_to_perl_shape(p)
+  -- Instead of using p:to_table() which creates a huge intermediate structure,
+  -- we map the fields directly from the lazy parser object.
   local res = {
     version = p.version,
     created = format_date(p.created),
@@ -69,8 +67,7 @@ function M.map_to_perl_shape(p)
     },
   }
 
-  -- Phase 3 Mappings (Disclosed and Allowed Vendors)
-  -- The Perl shape expects vendor.disclosed and vendor.allowed
+  -- Phase 3 Mappings
   if p.vendorDisclosed then
     res.vendor.disclosed = clean_table_to_perl_shape(p.vendorDisclosed) or {}
   end
@@ -78,14 +75,11 @@ function M.map_to_perl_shape(p)
     res.vendor.allowed = clean_table_to_perl_shape(p.vendorAllowed) or {}
   end
 
-  -- Publisher segment is special: it includes restrictions (from Core)
-  -- and optional fields (from Type 3 segment).
   local publisher = {
     restrictions = clean_table_to_perl_shape(p.publisherRestrictions or {})
       or {},
   }
 
-  -- Only add these if the segment actually exists (non-nil)
   if p.pubPurposesConsent ~= nil then
     publisher.consents = clean_table_to_perl_shape(p.pubPurposesConsent) or {}
     publisher.legitimate_interests = clean_table_to_perl_shape(
@@ -100,20 +94,15 @@ function M.map_to_perl_shape(p)
   end
 
   res.publisher = publisher
-
   return res
 end
 
 local function to_json_val(v)
-  if type(v) == "string" then
+  local t = type(v)
+  if t == "string" then
     return '"' .. v .. '"'
-  end
-  if type(v) == "table" then
-    local pieces = {}
-    for k, val in pairs(v) do
-      table.insert(pieces, tostring(k) .. "=" .. to_json_val(val))
-    end
-    return "{" .. table.concat(pieces, ",") .. "}"
+  elseif t == "table" then
+    return "{...}"
   end
   return tostring(v)
 end
