@@ -28,7 +28,7 @@ ENV_SETUP    = export LUA_PATH="$(ROCKS_LUA);./src/?.lua;./?.lua;;" && \
                export LUA_CPATH="$(ROCKS_CLUA);;" && \
                export PATH="$(ROCKS_BIN):$$PATH"
 
-.PHONY: all test lint format coverage changelog dist install clean setup
+.PHONY: all test lint format check-format coverage changelog dist install clean setup ci task
 
 all: test
 
@@ -41,7 +41,14 @@ setup:
 	$(LUAROCKS) install luacheck --tree $(ROCKS_PATH)
 	$(LUAROCKS) install luacov --tree $(ROCKS_PATH)
 	@echo "Dependencies installed in $(ROCKS_PATH)/"
+	@echo "Note: 'stylua' must be installed manually (see CONTRIBUTING.md)"
 	@echo "The Makefile will now automatically use them for 'make test', 'make lint', etc."
+
+ci: check-format lint test coverage
+	@echo "CI check passed successfully."
+
+task: format lint test
+	@echo "Development tasks completed successfully."
 
 test:
 	@$(ENV_SETUP) && $(BUSTED) $(TEST_DIR)
@@ -50,7 +57,10 @@ lint:
 	@$(ENV_SETUP) && $(LUACHECK) $(SRC_DIR) $(TEST_DIR)
 
 format:
-	@$(ENV_SETUP) && $(STYLUA) $(SRC_DIR) $(TEST_DIR)
+	@$(STYLUA) $(SRC_DIR) $(TEST_DIR)
+
+check-format:
+	@$(STYLUA) --check $(SRC_DIR) $(TEST_DIR)
 
 coverage:
 	@$(ENV_SETUP) && $(BUSTED) --coverage $(TEST_DIR)
