@@ -1,0 +1,33 @@
+name: Linux Tests
+
+on:
+  push:
+    branches: [ devel, main ]
+  pull_request:
+    branches: [ devel, main ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        luaversion: ["5.1", "5.2", "5.3", "5.4", "luajit", "luajit-openresty"]
+
+    steps:
+    - uses: actions/checkout@v4
+    
+    - uses: leafo/gh-actions-lua@v10
+      with:
+        luaVersion: ${{ matrix.luaversion }}
+
+    - name: Run Tests
+      run: |
+        export LUA_PATH="./?.lua;;"
+        # For now, run the plumbing test if it exists
+        if [ -f test/plumbing_spec.lua ]; then
+          lua test/plumbing_spec.lua
+        else
+          echo "No tests to run yet."
+        fi
