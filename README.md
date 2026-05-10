@@ -1,6 +1,6 @@
 # lua-gdpr-iab-tcfv2
 
-[![Build](https://img.shields.io/github/actions/workflow/status/peczenyj/lua-gdpr-iab-tcfv2/linux.yml?branch=devel&label=build)](https://github.com/peczenyj/lua-gdpr-iab-tcfv2/actions)
+[![Build](https://img.shields.io/github/actions/workflow/status/peczenyj/lua-gdpr-iab-tcfv2/linux.yml?branch=devel&label=build&logo=Lua)](https://github.com/peczenyj/lua-gdpr-iab-tcfv2/actions)
 [![Luacheck](https://img.shields.io/github/actions/workflow/status/peczenyj/lua-gdpr-iab-tcfv2/luacheck.yml?label=Luacheck&logo=Lua)](https://github.com/peczenyj/lua-gdpr-iab-tcfv2/actions?workflow=Luacheck)
 [![License](https://img.shields.io/github/license/peczenyj/lua-gdpr-iab-tcfv2)](LICENSE)
 [![Coverage Status](https://coveralls.io/repos/github/peczenyj/lua-gdpr-iab-tcfv2/badge.svg)](https://coveralls.io/github/peczenyj/lua-gdpr-iab-tcfv2)
