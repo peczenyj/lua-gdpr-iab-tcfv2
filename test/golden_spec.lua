@@ -62,7 +62,11 @@ describe("Golden Parity", function()
         local ok, diff_err = parity.deep_compare(actual, expected)
         assert.is_true(
           ok,
-          string.format("Deep mismatch at line %d: %s", count, tostring(diff_err))
+          string.format(
+            "Deep mismatch at line %d: %s",
+            count,
+            tostring(diff_err)
+          )
         )
       end
 
