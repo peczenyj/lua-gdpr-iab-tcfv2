@@ -13,9 +13,6 @@ function BitStream.new(data)
 end
 
 function BitStream:read_int(bits)
-    if type(self) ~= "table" then
-        error("BitStream:read_int called with self as " .. type(self) .. " (value: " .. tostring(self) .. ")")
-    end
     if bits == 0 then return 0 end
     if self.bit_pos + bits > self.len * 8 then
         return nil, "unexpected end of bitstream"
