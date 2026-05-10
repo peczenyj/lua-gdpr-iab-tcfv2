@@ -1,4 +1,5 @@
 local BitStream = require("gdpr.iab.tcfv2.bitstream")
+local common = require("gdpr.iab.tcfv2.common")
 
 local Core = {}
 Core.__index = Core
@@ -22,116 +23,6 @@ local OFFSETS = {
   PUBLISHER_COUNTRY_CODE = 201,
   VENDOR_CONSENT = 213,
 }
-
-local function decode_char6(bs)
-  local val = bs:read_int(6)
-  if not val then
-    return nil
-  end
-  return string.char(string.byte("A") + val)
-end
-
-local function decode_language(bs)
-  local c1 = decode_char6(bs)
-  local c2 = decode_char6(bs)
-  if not c1 or not c2 then
-    return nil
-  end
-  return c1 .. c2
-end
-
-local function decode_bitfield_fixed(bs, start_offset, length)
-  bs:seek(start_offset)
-  local res = {}
-  for i = 1, length do
-    res[i] = bs:read_bool()
-  end
-  return res
-end
-
-local function decode_vendor_bitfield(bs, start_offset, max_id, target_vendors)
-  local res = {}
-  if target_vendors then
-    local target_map = {}
-    for _, id in ipairs(target_vendors) do
-      target_map[id] = true
-    end
-
-    for i = 1, max_id do
-      local val = bs:read_bool()
-      if target_map[i] then
-        res[i] = val
-      end
-    end
-  else
-    bs:seek(start_offset)
-    for i = 1, max_id do
-      res[i] = bs:read_bool()
-    end
-  end
-  return res
-end
-
-local function decode_vendor_range(bs, max_id, target_vendors)
-  local num_entries = bs:read_int(12)
-  local res = {}
-
-  local target_map
-  if target_vendors then
-    target_map = {}
-    for _, id in ipairs(target_vendors) do
-      target_map[id] = true
-    end
-  end
-
-  for _ = 1, num_entries do
-    local is_range = bs:read_bool()
-    local start_id = bs:read_int(16)
-    if is_range then
-      local end_id = bs:read_int(16)
-      if target_map then
-        for id = start_id, end_id do
-          if target_map[id] then
-            res[id] = true
-          end
-        end
-      else
-        for id = start_id, end_id do
-          res[id] = true
-        end
-      end
-    else
-      if not target_map or target_map[start_id] then
-        res[start_id] = true
-      end
-    end
-  end
-
-  return res
-end
-
-local function decode_vendor_section(self, start_offset)
-  self.bs:seek(start_offset)
-  local max_id = self.bs:read_int(16)
-  if not max_id then
-    return nil, start_offset
-  end
-
-  local is_range = self.bs:read_bool()
-  local res
-  if not is_range then
-    res = decode_vendor_bitfield(
-      self.bs,
-      self.bs:pos(),
-      max_id,
-      self.options.targetVendors
-    )
-    return res, start_offset + 17 + max_id
-  else
-    res = decode_vendor_range(self.bs, max_id, self.options.targetVendors)
-    return res, self.bs:pos()
-  end
-end
 
 local function decode_publisher_restrictions(bs)
   local val = bs:read_int(12)
@@ -203,7 +94,7 @@ local FIELDS = {
   end,
   consentLanguage = function(self)
     self.bs:seek(OFFSETS.CONSENT_LANGUAGE)
-    return decode_language(self.bs)
+    return common.decode_language(self.bs)
   end,
   vendorListVersion = function(self)
     return decode_bitstream_field(self, 12, OFFSETS.VENDOR_LIST_VERSION)
@@ -227,7 +118,7 @@ local FIELDS = {
   end,
   publisherCountryCode = function(self)
     self.bs:seek(OFFSETS.PUBLISHER_COUNTRY_CODE)
-    return decode_language(self.bs)
+    return common.decode_language(self.bs)
   end,
   created = function(self)
     return decode_bitstream_field(self, 36, OFFSETS.CREATED)
@@ -236,16 +127,24 @@ local FIELDS = {
     return decode_bitstream_field(self, 36, OFFSETS.LAST_UPDATED)
   end,
   specialFeaturesOptIn = function(self)
-    return decode_bitfield_fixed(self.bs, OFFSETS.SPECIAL_FEATURE_OPT_IN, 12)
+    return common.decode_bitfield_fixed(
+      self.bs,
+      OFFSETS.SPECIAL_FEATURE_OPT_IN,
+      12
+    )
   end,
   purposeConsents = function(self)
-    return decode_bitfield_fixed(self.bs, OFFSETS.PURPOSE_CONSENT, 24)
+    return common.decode_bitfield_fixed(self.bs, OFFSETS.PURPOSE_CONSENT, 24)
   end,
   purposeLegitimateInterests = function(self)
-    return decode_bitfield_fixed(self.bs, OFFSETS.PURPOSE_LI, 24)
+    return common.decode_bitfield_fixed(self.bs, OFFSETS.PURPOSE_LI, 24)
   end,
   vendorConsents = function(self)
-    local res, next_offset = decode_vendor_section(self, OFFSETS.VENDOR_CONSENT)
+    local res, next_offset = common.decode_vendor_section(
+      self.bs,
+      OFFSETS.VENDOR_CONSENT,
+      self.options
+    )
     self._cache.vendorLegitimateInterests_offset = next_offset
     return res
   end,
@@ -255,7 +154,8 @@ local FIELDS = {
       local _ = self.vendorConsents
       offset = self._cache.vendorLegitimateInterests_offset
     end
-    local res, next_offset = decode_vendor_section(self, offset)
+    local res, next_offset =
+      common.decode_vendor_section(self.bs, offset, self.options)
     self._cache.publisherRestrictions_offset = next_offset
     return res
   end,

@@ -36,9 +36,10 @@ A zero-dependency, JIT-optimized Lua parser for IAB TCF v2.x.
 - [x] Implement `strict` vs `lenient` mode and `targetVendors` optimization.
 - [x] Map all fields to **CamelCase** (matching GVL/JSON).
 
-### Phase 3: Multi-Segment Router
-- [ ] Implement `src/gdpr/iab/tcfv2/router.lua` to handle `.` splitting.
-- [ ] Route Type 1 (Disclosed), Type 2 (Allowed), Type 3 (Pub TC).
+### Phase 3: Multi-Segment Router [DONE]
+- [x] Implement `src/gdpr/iab/tcfv2/router.lua` to handle `.` splitting.
+- [x] Route Type 1 (Disclosed), Type 2 (Allowed), Type 3 (Pub TC).
+
 
 ### Phase 4: Validator & Documentation
 - [ ] Implement `src/gdpr/iab/tcfv2/validator.lua` as a separate policy engine.
