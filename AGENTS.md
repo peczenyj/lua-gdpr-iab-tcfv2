@@ -8,8 +8,9 @@ Optimized for high-performance middleware environments like **OpenResty** and **
 
 ## Operational Boundaries (Gitflow)
 1. **Branching Strategy**:
-   - `devel`: Main development branch. All feature branches (`feat/*`) must merge here.
-   - `main`: Production/Release branch. Only includes tagged releases via `gitflow release`.
+   - `main`: **OFF LIMITS**. No direct commits or pushes. Only includes tagged releases via `gitflow release`.
+   - `devel`: Main development branch. **NEVER** commit directly without explicit permission for very specific tasks. All feature branches (`feat/*`) must merge here.
+   - **Feature Workflow**: Always create a branch, work, commit, push, create a Pull Request, and assign it to the project owner (@peczenyj).
 2. **Release Process**: Releases are made from `devel` to `main`. Tags (`v*`) trigger automated release artifacts (.tar.gz) and potentially Luarocks uploads.
 3. **Commit Messages**: Follow Conventional Commits: `type(scope): short description`.
    - Types: `feat`, `fix`, `docs`, `style`, `refactor`, `test`, `chore`.
@@ -17,6 +18,7 @@ Optimized for high-performance middleware environments like **OpenResty** and **
 
 ## Technical Rules & Conventions
 1. **Lua Compatibility**: Compatible with Lua 5.1, 5.2, 5.3, 5.4, and LuaJIT.
+   - **Package Structure**: Source files are in `src/gdpr/iab/tcfv2/` mapping to the `gdpr.iab.tcfv2` module.
    - **Zero-dependency**: No external libraries allowed in `src/`. Use internal bridges for bitwise and Base64.
 2. **Architecture**: **Lazy/On-demand decoding** with caching via metatables.
 3. **Error Handling**: 
@@ -33,4 +35,4 @@ Optimized for high-performance middleware environments like **OpenResty** and **
 ## Build & Test
 - Use `Makefile` for all common tasks (`make test`, `make lint`, `make format`, `make dist`).
 - Tests MUST verify against the Perl Golden File corpus for logical parity.
-
+- The Golden Corpus is stored uncompressed in `test/corpus/golden.jsonl` to avoid C-binding dependencies (gzip) during testing.
