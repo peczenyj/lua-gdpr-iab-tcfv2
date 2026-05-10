@@ -40,15 +40,19 @@ print(parser.vendorConsents[284]) -- true/false
 ## Development
 
 ### First-time Setup
-To set up the development environment, ensure you have **LuaRocks** installed, then run:
+To set up the development environment:
 
-```bash
-make setup
-```
+1.  **Install Prerequisites**:
+    - **LuaRocks**: `sudo apt install luarocks` (or `brew install luarocks`)
+    - **StyLua**: Download from [GitHub Releases](https://github.com/JohnnyMorganz/StyLua/releases) and add to PATH.
+2.  **Initialize Environment**:
+    ```bash
+    make setup
+    ```
 
-The `Makefile` is configured to automatically include local dependencies from `.rocks/` in the `LUA_PATH` and `PATH` for all tasks (`make test`, `make lint`, etc.).
+The `Makefile` automatically handles local dependencies in `.rocks/`. Use `make task` during development to format, lint, and test your changes.
 
-See [TODO.md](TODO.md) for the project roadmap and [AGENTS.md](AGENTS.md) for technical conventions.
+See [CONTRIBUTING.md](CONTRIBUTING.md) for detailed instructions and [AGENTS.md](AGENTS.md) for technical conventions.
 
 ## License
 MIT

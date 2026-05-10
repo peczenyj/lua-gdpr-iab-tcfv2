@@ -1,55 +1,65 @@
 # Contributing to lua-gdpr-iab-tcfv2
 
-Patches are welcome! Please follow these guidelines to ensure a smooth contribution process.
+Patches are welcome! This project enforces strict code quality and formatting standards via CI.
 
-## Branching Strategy (Gitflow)
+## Prerequisites
 
-This project follows a Gitflow-like branching model:
+Before you start, ensure you have the following installed:
 
-- **`devel`**: The main development branch. All feature branches (`feat/*`) and bugfix branches (`fix/*`) should be branched from and merged into `devel`.
-- **`main`**: The production branch. It contains only tagged releases. Merges to `main` come from `devel` or `hotfix/*` branches.
+1.  **Lua (5.1, 5.2, 5.3, 5.4, or LuaJIT)**:
+    - Ubuntu: `sudo apt install lua5.4`
+    - macOS: `brew install lua`
+2.  **LuaRocks**:
+    - Ubuntu: `sudo apt install luarocks`
+    - macOS: `brew install luarocks`
+3.  **StyLua** (Code Formatter):
+    - StyLua is a Rust-based tool and is **not** available via LuaRocks.
+    - **Installation**:
+        - **macOS**: `brew install stylua`
+        - **Rust/Cargo**: `cargo install stylua`
+        - **Linux (Manual)**: Download the latest binary from the [StyLua Releases](https://github.com/JohnnyMorganz/StyLua/releases) page, unzip it, and move it to your `/usr/local/bin/`.
+        - **GitHub Action**: Handled automatically in CI.
 
 ## Development Workflow
 
-1.  **Fork and Clone**: Fork the repository on GitHub and clone it locally.
-2.  **Setup Dependencies**: Ensure you have `luarocks` installed.
-    - **Ubuntu/Debian**: `sudo apt install luarocks`
-    - **macOS**: `brew install luarocks`
-    - **Others**: See [luarocks.org](https://luarocks.org/)
+### 1. Setup Local Environment
+Initialize the local dependencies folder (`.rocks/`):
+```bash
+make setup
+```
+This installs `busted`, `luacheck`, and `luacov` locally. The `Makefile` will automatically detect and use this folder.
 
-    Then initialize the local environment:
-    ```bash
-    make setup
-    ```
-    The `Makefile` will automatically handle the local paths for all development tasks.
-3.  **Create a Branch**: Branch off from `devel`.
-    ```bash
-    git checkout devel
-    git pull origin devel
-    git checkout -b feat/my-new-feature
-    ```
-4.  **Implement and Test**: Make your changes. Ensure you add tests in `test/` (using Busted).
-5.  **Lint and Format**: Before committing, run the linter and formatter.
-    ```bash
-    make lint
-    make format
-    ```
-6.  **Commit**: Use Conventional Commits (`type(scope): description`).
-    ```bash
-    git commit -m "feat(parser): add support for new segment"
-    ```
-7.  **Push and PR**: Push your branch to your fork and open a Pull Request against the `devel` branch.
+### 2. Branching Strategy (Gitflow)
+- **`devel`**: Main development branch. **Never** commit directly.
+- **`main`**: Production branch. Tagged releases only.
+- Always create a branch for your work:
+  ```bash
+  git checkout devel
+  git pull origin devel
+  git checkout -b feat/my-new-feature
+  ```
 
-## Tooling
+### 3. Implement and Validate
+This project uses two main orchestration targets in the `Makefile`:
 
-This project uses a `Makefile` to orchestrate development tasks:
+- **`make task`**: Use this during active development. It will **format** your code, run the **linter**, and execute the **tests**.
+- **`make ci`**: Use this to simulate what happens in GitHub Actions. It **verifies** formatting (fails if incorrect), runs the **linter**, and executes the **tests** with coverage.
 
-- `make setup`: Install development dependencies locally via LuaRocks.
-- `make test`: Run the test suite (requires Busted).
-- `make lint`: Check code quality (requires Luacheck).
-- `make format`: Format code (requires StyLua).
-- `make coverage`: Generate a coverage report (requires Luacov).
+### 4. Committing and Pushing
+- Use **Conventional Commits** (`feat:`, `fix:`, `docs:`, etc.).
+- Ensure `make ci` passes before pushing.
+- Open a Pull Request against `devel` and assign it to @peczenyj.
+
+## Tooling Reference
+
+- `make setup`: Initialize local LuaRocks dependencies.
+- `make test`: Run the test suite (Busted).
+- `make lint`: Run the linter (Luacheck).
+- `make format`: Apply code formatting (StyLua).
+- `make check-format`: Verify code formatting without changing files.
+- `make coverage`: Generate a coverage report (Luacov).
+- `make ci`: Run all quality checks (used by GitHub Actions).
+- `make task`: Run development cycle (Format + Lint + Test).
 
 ## License
-
 By contributing, you agree that your contributions will be licensed under the MIT License.
