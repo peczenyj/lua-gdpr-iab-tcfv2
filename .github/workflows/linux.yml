@@ -50,6 +50,11 @@ jobs:
           make ci
         fi
 
+    - name: Verify Rockspec
+      run: |
+        # Ensure the rockspec can be built and installed
+        luarocks make --tree .rocks_verify *.rockspec
+
   release:
     needs: test
     if: startsWith(github.ref, 'refs/tags/v')
