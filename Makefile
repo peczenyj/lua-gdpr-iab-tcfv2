@@ -14,12 +14,15 @@ TEST_DIR     = test
 DIST_NAME    = lua-gdpr-iab-tcfv2
 VERSION      = 0.1.0
 
+# Set LUA_PATH to include src and test directories
+LUA_PATH_SET = "./?.lua;./src/?.lua;./test/?.lua;;"
+
 .PHONY: all test lint format coverage changelog dist install clean
 
 all: test
 
 test:
-	@export LUA_PATH="./?.lua;./src/?.lua;./test/?.lua;;" && $(BUSTED) $(TEST_DIR)
+	@export LUA_PATH="$(LUA_PATH_SET)" && $(BUSTED) $(TEST_DIR)
 
 lint:
 	$(LUACHECK) $(SRC_DIR) $(TEST_DIR)
@@ -28,7 +31,7 @@ format:
 	$(STYLUA) $(SRC_DIR) $(TEST_DIR)
 
 coverage:
-	@export LUA_PATH="./?.lua;./src/?.lua;./test/?.lua;;" && $(BUSTED) --coverage $(TEST_DIR)
+	@export LUA_PATH="$(LUA_PATH_SET)" && $(BUSTED) --coverage $(TEST_DIR)
 	$(LUACOV)
 	@echo "Coverage report generated in luacov.report.out"
 
@@ -45,7 +48,7 @@ dist:
 install:
 	@echo "Installing to standard Lua path..."
 	@mkdir -p /usr/local/share/lua/$(LUA_VERSION)/gdpr/iab/tcfv2
-	@cp src/*.lua /usr/local/share/lua/$(LUA_VERSION)/gdpr/iab/tcfv2/
+	@cp src/gdpr/iab/tcfv2/*.lua /usr/local/share/lua/$(LUA_VERSION)/gdpr/iab/tcfv2/
 	@echo "Done."
 
 clean:
