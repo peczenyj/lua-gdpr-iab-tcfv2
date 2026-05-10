@@ -53,6 +53,10 @@ A zero-dependency, JIT-optimized Lua parser for IAB TCF v2.x.
 - [ ] JIT profiling in LuaJIT.
 - [ ] **Cross-platform verification**: Add macOS and Windows to CI matrix.
 
+### Phase 6: Advanced Optimizations
+- [ ] **Strict Linkage**: Ensure `strict_legal_basis` in Validator triggers `strict` mode in Parser.
+- [ ] **Vendor Prefetch**: Use `targetVendors` optimization automatically in Validator to pre-fetch the required `vendor_id`.
+
 ## 4. Open Questions / Technical Decisions
 1. **JSON for Tests**: I will use a minimal, single-file JSON library in `test/vendor/` strictly for reading the Golden File. Production code remains zero-dependency.
 2. **Bitwise Fallback**: For Lua 5.1 (non-JIT), we will use a pure-Lua math-based fallback. It's slower but ensures the library works everywhere.
