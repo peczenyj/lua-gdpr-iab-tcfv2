@@ -1,5 +1,10 @@
+local bit = require("src.bit")
+
 local BitStream = {}
 BitStream.__index = BitStream
+
+local POW2 = {}
+for i = 0, 64 do POW2[i] = 2^i end
 
 function BitStream.new(data)
     local self = setmetatable({}, BitStream)
@@ -16,14 +21,25 @@ function BitStream:read_int(bits)
     end
 
     local val = 0
-    for i = 1, bits do
+    local remaining = bits
+    
+    while remaining > 0 do
         local byte_pos = math.floor(self.bit_pos / 8) + 1
-        local bit_in_byte = 7 - (self.bit_pos % 8)
+        local bit_in_byte = self.bit_pos % 8
+        local bits_left_in_byte = 8 - bit_in_byte
+        
+        local take = math.min(remaining, bits_left_in_byte)
         local byte = string.byte(self.data, byte_pos)
         
-        local bit_val = math.floor(byte / 2^bit_in_byte) % 2
-        val = val * 2 + bit_val
-        self.bit_pos = self.bit_pos + 1
+        -- Extract 'take' bits starting from 'bit_in_byte' (from high to low)
+        -- Shift right to remove bits to the right of our target
+        local shift_right = bits_left_in_byte - take
+        local mask_val = math.floor(byte / POW2[shift_right]) % POW2[take]
+        
+        val = val * POW2[take] + mask_val
+        
+        self.bit_pos = self.bit_pos + take
+        remaining = remaining - take
     end
     
     return val

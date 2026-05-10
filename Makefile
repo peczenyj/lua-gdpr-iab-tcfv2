@@ -19,7 +19,7 @@ VERSION      = 0.1.0
 all: test
 
 test:
-	@export LUA_PATH="./?.lua;./src/?.lua;;" && $(BUSTED) $(TEST_DIR)
+	@export LUA_PATH="./?.lua;./src/?.lua;./test/?.lua;;" && $(BUSTED) $(TEST_DIR)
 
 lint:
 	$(LUACHECK) $(SRC_DIR) $(TEST_DIR)
@@ -28,7 +28,7 @@ format:
 	$(STYLUA) $(SRC_DIR) $(TEST_DIR)
 
 coverage:
-	@export LUA_PATH="./?.lua;./src/?.lua;;" && $(BUSTED) --coverage $(TEST_DIR)
+	@export LUA_PATH="./?.lua;./src/?.lua;./test/?.lua;;" && $(BUSTED) --coverage $(TEST_DIR)
 	$(LUACOV)
 	@echo "Coverage report generated in luacov.report.out"
 

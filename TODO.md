@@ -24,10 +24,10 @@ A zero-dependency, JIT-optimized Lua parser for IAB TCF v2.x.
 - [ ] Add `.rockspec` template for Luarocks.
 
 ### Phase 1: Foundation (Plumbing)
-- [ ] Implement `src/base64.lua` (zero-dependency).
-- [ ] Implement `src/bit.lua` (version-agnostic bridge).
-- [ ] Implement `src/bitstream.lua` (high-performance reader).
-- [ ] **Golden Harness**: Setup `test/corpus/` with Perl's `golden.jsonl` and a minimal JSON reader for verification.
+- [x] Implement `src/base64.lua` (zero-dependency).
+- [x] Implement `src/bit.lua` (version-agnostic bridge).
+- [x] Implement `src/bitstream.lua` (high-performance reader).
+- [x] **Golden Harness**: Setup `test/corpus/` with Perl's `golden.jsonl` and a minimal JSON reader for verification.
 
 ### Phase 2: Core Segment & Lazy Infrastructure
 - [ ] Implement `src/core.lua` with metatable-based lazy decoding.

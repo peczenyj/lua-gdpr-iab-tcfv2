@@ -2,40 +2,60 @@ local bit = require("src.bit")
 local base64 = require("src.base64")
 local BitStream = require("src.bitstream")
 
-local function assert_eq(actual, expected, msg)
-    if actual ~= expected then
-        print("FAIL: " .. (msg or ""))
-        print("  Expected: " .. tostring(expected))
-        print("  Actual:   " .. tostring(actual))
-        os.exit(1)
-    end
-end
+describe("Plumbing", function()
+  describe("Bit bridge", function()
+    it("performs band correctly", function()
+      assert.are.equal(0, bit.band(0xF0, 0x0F))
+    end)
 
-print("Testing Bit bridge...")
-assert_eq(bit.band(0xF0, 0x0F), 0, "band")
-assert_eq(bit.bor(0xF0, 0x0F), 0xFF, "bor")
-assert_eq(bit.lshift(1, 4), 16, "lshift")
-assert_eq(bit.rshift(16, 4), 1, "rshift")
+    it("performs bor correctly", function()
+      assert.are.equal(0xFF, bit.bor(0xF0, 0x0F))
+    end)
 
-print("Testing Base64url...")
--- 'A' is 000000 in 6-bit. 'B' is 000001.
--- 'AB' -> 000000 000001 -> 00000000 0001....
--- 00000000 is 0. 00010000 is 16.
-local decoded = base64.decode_url("AB")
-assert_eq(decoded:sub(1,1), string.char(0), "base64 decode 1")
+    it("performs lshift correctly", function()
+      assert.are.equal(16, bit.lshift(1, 4))
+    end)
 
--- TCF test string snippet: 'COw'
--- C=2, O=14, w=48
--- 000010 001110 110000 -> 00001000 11101100 00......
--- 0x08 0xEC
-local decoded2 = base64.decode_url("COw")
-assert_eq(string.byte(decoded2, 1), 0x08, "base64 decode 2")
-assert_eq(string.byte(decoded2, 2), 0xEC, "base64 decode 3")
+    it("performs rshift correctly", function()
+      assert.are.equal(1, bit.rshift(16, 4))
+    end)
+  end)
 
-print("Testing BitStream...")
-local bs = BitStream.new(decoded2)
-assert_eq(bs:read_int(6), 2, "read_int 1")
-assert_eq(bs:read_int(6), 14, "read_int 2")
-assert_eq(bs:read_int(4), 12, "read_int 3") -- The high 4 bits of 'w' (110000)
+  describe("Base64url", function()
+    it("decodes simple strings", function()
+      local decoded = base64.decode_url("AB")
+      assert.are.equal(string.char(0) .. string.char(16), decoded)
+    end)
 
-print("All plumbing tests passed!")
+    it("decodes TCF header snippet", function()
+      local decoded = base64.decode_url("COw")
+      assert.are.equal(0x08, string.byte(decoded, 1))
+      assert.are.equal(0xEC, string.byte(decoded, 2))
+    end)
+  end)
+
+  describe("BitStream", function()
+    it("reads integers correctly", function()
+      local decoded = base64.decode_url("COw")
+      local bs = BitStream.new(decoded)
+      assert.are.equal(2, bs:read_int(6))
+      assert.are.equal(14, bs:read_int(6))
+      assert.are.equal(12, bs:read_int(4))
+    end)
+
+    it("reads booleans correctly", function()
+      local bs = BitStream.new(string.char(0x80)) -- 10000000
+      assert.is_true(bs:read_bool())
+      assert.is_false(bs:read_bool())
+    end)
+
+    it("handles peek and seek", function()
+      local bs = BitStream.new(string.char(0xFF))
+      assert.are.equal(15, bs:peek_int(4))
+      assert.are.equal(0, bs:pos())
+      assert.are.equal(255, bs:read_int(8))
+      bs:seek(4)
+      assert.are.equal(15, bs:read_int(4))
+    end)
+  end)
+end)

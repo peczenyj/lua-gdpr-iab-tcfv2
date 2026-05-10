@@ -34,11 +34,7 @@ jobs:
       run: make lint
 
     - name: Run Tests
-      run: |
-        export LUA_PATH="./?.lua;./src/?.lua;;"
-        # Fix for environments where lua might be named differently
-        LUA_CMD=$(which lua || which luajit || echo "lua")
-        $LUA_CMD test/plumbing_spec.lua
+      run: make test
 
     - name: Run Coverage (Busted)
       run: make coverage
