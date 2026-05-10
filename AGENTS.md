@@ -34,6 +34,7 @@ Optimized for high-performance middleware environments like **OpenResty** and **
 
 ## Build & Test
 - Use `Makefile` for all common tasks (`make test`, `make lint`, `make format`, `make dist`).
+- **Mandatory CI Check**: Agents **MUST** run `make ci` and ensure it passes locally before making any commit or push. This ensures that formatting, linting, and tests are verified as they will be in GitHub Actions.
 - Tests MUST verify against the Perl Golden File corpus for logical parity.
 - The Golden Corpus is stored uncompressed in `test/corpus/golden.jsonl` to avoid C-binding dependencies (gzip) during testing.
 

@@ -13,9 +13,13 @@ LUACOV       = luacov
 GIT_CLIFF    = git-cliff
 
 SRC_DIR      = src
-TEST_DIR     = test
 DIST_NAME    = lua-gdpr-iab-tcfv2
 VERSION      = 0.1.0
+
+# Test Directories
+TEST_UNITS     = test/units
+TEST_REFERENCE = test/reference
+TEST_FUZZ      = test/fuzz
 
 # Local dependencies path
 ROCKS_PATH   = ./.rocks
@@ -28,7 +32,14 @@ ENV_SETUP    = export LUA_PATH="$(ROCKS_LUA);./src/?.lua;./test/?.lua;./?.lua;;"
                export LUA_CPATH="$(ROCKS_CLUA);;" && \
                export PATH="$(ROCKS_BIN):$$PATH"
 
-.PHONY: all test lint format check-format coverage changelog dist install clean setup ci task
+# Verbose mode handling
+ifeq ($(TCF_VERBOSE), 1)
+  BUSTED_FLAGS = -o gtest
+else
+  BUSTED_FLAGS =
+endif
+
+.PHONY: all test test-reference test-fuzz lint format check-format coverage report-coverage changelog dist install clean setup ci task
 
 all: test
 
@@ -40,32 +51,47 @@ setup:
 	$(LUAROCKS) install busted --tree $(ROCKS_PATH)
 	$(LUAROCKS) install luacheck --tree $(ROCKS_PATH)
 	$(LUAROCKS) install luacov --tree $(ROCKS_PATH)
+	$(LUAROCKS) install luacov-coveralls --tree $(ROCKS_PATH)
 	@echo "Dependencies installed in $(ROCKS_PATH)/"
-	@echo "Note: 'stylua' must be installed manually (see CONTRIBUTING.md)"
-	@echo "The Makefile will now automatically use them for 'make test', 'make lint', etc."
+	@echo "Note: 'stylua' must be installed manually (see DEVELOPMENT.md)"
 
-ci: check-format lint test coverage
+# CI orchestrates all tests
+ci: check-format lint test test-reference test-fuzz
 	@echo "CI check passed successfully."
 
+# Local development loop
 task: format lint test
 	@echo "Development tasks completed successfully."
 
+# Unit tests only (Default)
 test:
-	@$(ENV_SETUP) && $(BUSTED) $(TEST_DIR)
+	@$(ENV_SETUP) && $(BUSTED) $(BUSTED_FLAGS) $(TEST_UNITS)
+
+# Full Reference scan
+test-reference:
+	@$(ENV_SETUP) && $(BUSTED) $(BUSTED_FLAGS) $(TEST_REFERENCE)
+
+# Fuzz tests
+test-fuzz:
+	@$(ENV_SETUP) && $(BUSTED) $(BUSTED_FLAGS) $(TEST_FUZZ)
 
 lint:
-	@$(ENV_SETUP) && $(LUACHECK) $(SRC_DIR) $(TEST_DIR)
+	@$(ENV_SETUP) && $(LUACHECK) $(SRC_DIR) $(TEST_UNITS) $(TEST_REFERENCE) $(TEST_FUZZ)
 
 format:
-	@$(STYLUA) $(SRC_DIR) $(TEST_DIR)
+	@$(STYLUA) $(SRC_DIR) $(TEST_UNITS) $(TEST_REFERENCE) $(TEST_FUZZ)
 
 check-format:
-	@$(STYLUA) --check $(SRC_DIR) $(TEST_DIR)
+	@$(STYLUA) --check $(SRC_DIR) $(TEST_UNITS) $(TEST_REFERENCE) $(TEST_FUZZ)
 
 coverage:
-	@$(ENV_SETUP) && $(BUSTED) --coverage $(TEST_DIR)
+	@$(ENV_SETUP) && $(BUSTED) $(BUSTED_FLAGS) --coverage $(TEST_UNITS)
 	@$(ENV_SETUP) && $(LUACOV)
-	@echo "Coverage report generated in luacov.report.out"
+	@echo "Coverage Summary:"
+	@grep -A 999 "Summary" luacov.report.out || cat luacov.report.out
+
+report-coverage:
+	@$(ENV_SETUP) && luacov-coveralls -i src
 
 changelog:
 	$(GIT_CLIFF) -o CHANGELOG.md

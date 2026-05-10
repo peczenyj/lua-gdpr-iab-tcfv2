@@ -8,21 +8,25 @@ on:
 
 jobs:
   test:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
 
     strategy:
       fail-fast: false
       matrix:
-        luaversion: ["5.1", "5.2", "5.3", "5.4"]
+        luaVersion: ["5.4", "5.3", "5.2", "5.1", "luajit", "luajit-openresty"]
 
     steps:
     - uses: actions/checkout@v4
     
-    - uses: leafo/gh-actions-lua@v10
+    - name: Setup Lua
+      uses: hishamhm/gh-actions-lua@master
       with:
-        luaVersion: ${{ matrix.luaversion }}
+        luaVersion: ${{ matrix.luaVersion }}
 
-    - uses: leafo/gh-actions-luarocks@v4
+    - name: Setup LuaRocks
+      uses: hishamhm/gh-actions-luarocks@master
+      with:
+        luaRocksVersion: "3.13.0"
 
     - name: Install StyLua
       run: |
@@ -37,9 +41,29 @@ jobs:
         luarocks install busted
         luarocks install luacheck
         luarocks install luacov
+        luarocks install luacov-coveralls
 
-    - name: Run CI (Format Check, Lint, Test, Coverage)
-      run: make ci
+    - name: Run CI (Format Check, Lint, Test)
+      run: |
+        if [[ "${{ matrix.luaVersion }}" == "luajit"* ]]; then
+          make ci LUA_BIN=luajit
+        else
+          make ci
+        fi
+
+    - name: Report Coverage
+      if: success()
+      run: |
+        # We run unit tests with coverage and report
+        make coverage
+        make report-coverage
+      env:
+        COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
+
+    - name: Verify Rockspec
+      run: |
+        # Ensure the rockspec can be built and installed
+        luarocks make --tree .rocks_verify *.rockspec
 
   release:
     needs: test

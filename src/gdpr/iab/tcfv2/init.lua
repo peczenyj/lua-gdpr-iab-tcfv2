@@ -1,5 +1,6 @@
 local base64 = require("gdpr.iab.tcfv2.base64")
 local Core = require("gdpr.iab.tcfv2.core")
+local Router = require("gdpr.iab.tcfv2.router")
 
 local M = {}
 
@@ -40,12 +41,33 @@ function M.new(tc_string, options)
     end
   end
 
-  -- Phase 3 will handle other segments. For now, we just route the Core segment.
+  -- Route other segments
+  local other_segments, r_err = Router.decode_segments(segments, options)
+  if not other_segments then
+    return nil, r_err
+  end
+
   -- We use a proxy metatable to expose Core fields directly on the Parser object.
-  local parser = setmetatable({
+  local parser = {
     _core = core,
     _segments = segments,
-  }, {
+    _other = other_segments,
+  }
+
+  function parser:to_table()
+    local res = self._core:to_table()
+    for _, seg in pairs(self._other) do
+      if seg.to_table then
+        local st = seg:to_table()
+        for k, v in pairs(st) do
+          res[k] = v
+        end
+      end
+    end
+    return res
+  end
+
+  setmetatable(parser, {
     __index = function(tbl, key)
       if key == "tc_string" then
         return tbl._core.tc_string
@@ -54,16 +76,17 @@ function M.new(tc_string, options)
         return tbl._core.warnings
       end
 
+      -- Check other segments for direct field access
+      for _, seg in pairs(tbl._other) do
+        if seg[key] ~= nil then
+          return seg[key]
+        end
+      end
+
       -- Delegate to Core
       local val = tbl._core[key]
       if val ~= nil then
         return val
-      end
-
-      if key == "to_table" then
-        return function(p)
-          return p._core:to_table()
-        end
       end
 
       if key == "is_v22_plus" then
