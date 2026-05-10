@@ -20,8 +20,8 @@ This project follows a Gitflow-like branching model:
     Then initialize the local environment:
     ```bash
     make setup
-    # Follow the instructions printed by make setup to update your PATH and LUA_PATH
     ```
+    The `Makefile` will automatically handle the local paths for all development tasks.
 3.  **Create a Branch**: Branch off from `devel`.
     ```bash
     git checkout devel

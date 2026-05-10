@@ -14,28 +14,37 @@ TEST_DIR     = test
 DIST_NAME    = lua-gdpr-iab-tcfv2
 VERSION      = 0.1.0
 
+# Local dependencies path
+ROCKS_PATH   = ./.rocks
+ROCKS_LUA    = $(ROCKS_PATH)/share/lua/$(LUA_VERSION)/?.lua
+ROCKS_BIN    = $(ROCKS_PATH)/bin
+
+# Environment setup for local dependencies
+ENV_SETUP    = export LUA_PATH="$(ROCKS_LUA);./src/?.lua;./?.lua;;" && \
+               export PATH="$(ROCKS_BIN):$$PATH"
+
 .PHONY: all test lint format coverage changelog dist install clean setup
 
 all: test
 
 setup:
 	@echo "Installing development dependencies..."
-	$(LUAROCKS) install --only-deps --tree .rocks *.rockspec
-	@echo "Dependencies installed in .rocks/"
-	@echo "Run 'export LUA_PATH=\"./.rocks/share/lua/$(LUA_VERSION)/?.lua;./src/?.lua;;\"; export PATH=\"./.rocks/bin:$$PATH\"' to use them."
+	$(LUAROCKS) install --only-deps --tree $(ROCKS_PATH) *.rockspec
+	@echo "Dependencies installed in $(ROCKS_PATH)/"
+	@echo "The Makefile will now automatically use them for 'make test', 'make lint', etc."
 
 test:
-	@export LUA_PATH="./?.lua;./src/?.lua;;" && $(BUSTED) $(TEST_DIR)
+	@$(ENV_SETUP) && $(BUSTED) $(TEST_DIR)
 
 lint:
-	$(LUACHECK) $(SRC_DIR) $(TEST_DIR)
+	@$(ENV_SETUP) && $(LUACHECK) $(SRC_DIR) $(TEST_DIR)
 
 format:
-	$(STYLUA) $(SRC_DIR) $(TEST_DIR)
+	@$(ENV_SETUP) && $(STYLUA) $(SRC_DIR) $(TEST_DIR)
 
 coverage:
-	@export LUA_PATH="./?.lua;./src/?.lua;;" && $(BUSTED) --coverage $(TEST_DIR)
-	$(LUACOV)
+	@$(ENV_SETUP) && $(BUSTED) --coverage $(TEST_DIR)
+	@$(ENV_SETUP) && $(LUACOV)
 	@echo "Coverage report generated in luacov.report.out"
 
 changelog:
@@ -55,4 +64,4 @@ install:
 	@echo "Done."
 
 clean:
-	rm -rf *.tar.gz luacov.*.out luacov.report.out
+	rm -rf *.tar.gz luacov.*.out luacov.report.out $(ROCKS_PATH)

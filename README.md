@@ -44,10 +44,9 @@ To set up the development environment, ensure you have **LuaRocks** installed, t
 
 ```bash
 make setup
-export LUA_PATH="./.rocks/share/lua/5.4/?.lua;./src/?.lua;;"
-export PATH="./.rocks/bin:$PATH"
 ```
-*(Adjust `5.4` to your Lua version if necessary).*
+
+The `Makefile` is configured to automatically include local dependencies from `.rocks/` in the `LUA_PATH` and `PATH` for all tasks (`make test`, `make lint`, etc.).
 
 See [TODO.md](TODO.md) for the project roadmap and [AGENTS.md](AGENTS.md) for technical conventions.
 
