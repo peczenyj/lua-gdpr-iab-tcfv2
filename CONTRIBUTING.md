@@ -12,7 +12,12 @@ This project follows a Gitflow-like branching model:
 ## Development Workflow
 
 1.  **Fork and Clone**: Fork the repository on GitHub and clone it locally.
-2.  **Setup Dependencies**: Ensure you have `luarocks` installed, then initialize the local environment:
+2.  **Setup Dependencies**: Ensure you have `luarocks` installed.
+    - **Ubuntu/Debian**: `sudo apt install luarocks`
+    - **macOS**: `brew install luarocks`
+    - **Others**: See [luarocks.org](https://luarocks.org/)
+
+    Then initialize the local environment:
     ```bash
     make setup
     # Follow the instructions printed by make setup to update your PATH and LUA_PATH
