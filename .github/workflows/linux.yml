@@ -13,7 +13,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        luaversion: ["5.1", "5.2", "5.3", "5.4", "luajit-2.1.0-beta3", "openresty"]
+        luaversion: ["5.1", "5.2", "5.3", "5.4", "luajit-2.1", "luajit-openresty"]
 
     steps:
     - uses: actions/checkout@v4
@@ -35,7 +35,7 @@ jobs:
     - name: Install Dev Dependencies
       run: |
         # Use --lua-version to help LuaRocks find the correct manifest
-        if [[ "${{ matrix.luaversion }}" == *"luajit"* ]] || [[ "${{ matrix.luaversion }}" == "openresty" ]]; then
+        if [[ "${{ matrix.luaversion }}" == *"luajit"* ]]; then
            LV="5.1"
         else
            LV="${{ matrix.luaversion }}"
@@ -46,7 +46,7 @@ jobs:
 
     - name: Run CI (Format Check, Lint, Test, Coverage)
       run: |
-        if [[ "${{ matrix.luaversion }}" == *"luajit"* ]] || [[ "${{ matrix.luaversion }}" == "openresty" ]]; then
+        if [[ "${{ matrix.luaversion }}" == *"luajit"* ]]; then
           # Find where luajit is installed by the action
           LUA_EXE=$(which luajit || which lua)
           make ci LUA_BIN=$LUA_EXE
