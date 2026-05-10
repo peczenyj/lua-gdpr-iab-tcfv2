@@ -48,14 +48,18 @@ A zero-dependency, JIT-optimized Lua parser for IAB TCF v2.x.
 - [x] Create `README.md` with Middleware Recipes (OpenResty/HAProxy).
 
 
-### Phase 5: Verification & Performance
+### Phase 5: Exhaustive Verification
 - [ ] Run full Golden Corpus suite (Verify MD5 consistency).
-- [ ] Implement `bench/` suite (Throughput, Latency, Memory churn).
-- [ ] JIT profiling in LuaJIT.
-- [ ] **Cross-platform verification**: Add macOS and Windows to CI matrix.
-- [ ] **Fuzz Data Optimization**: Support keeping only a logical subset of `to_json` data (e.g., under a `tests.fuzz` key) to further reduce corpus size.
+- [ ] Implement `TCF_CONTINUE_ON_FAILURE` for bulk error reporting.
+- [ ] Configure CI for Full Scan on stable/high-performance versions (5.5, LuaJIT).
 
-### Phase 6: Advanced Optimizations
+### Phase 6: Performance & Platform
+- [ ] Implement `bench/` suite (Throughput, Latency, Memory churn).
+- [ ] JIT profiling in LuaJIT and optimization hot-fixes.
+- [ ] **Cross-platform verification**: Add macOS and Windows to CI matrix.
+- [ ] **Fuzz Data Optimization**: Support keeping only a logical subset of `to_json` data (e.g., under a `tests.fuzz` key).
+
+### Phase 7: Advanced Optimizations
 - [ ] **Strict Linkage**: Ensure `strict_legal_basis` in Validator triggers `strict` mode in Parser.
 - [ ] **Vendor Prefetch**: Use `targetVendors` optimization automatically in Validator to pre-fetch the required `vendor_id`.
 
@@ -64,4 +68,4 @@ A zero-dependency, JIT-optimized Lua parser for IAB TCF v2.x.
 2. **Bitwise Fallback**: For Lua 5.1 (non-JIT), we will use a pure-Lua math-based fallback. It's slower but ensures the library works everywhere.
 3. **Vendor IDs**: Lua tables are 1-indexed. We will store vendor permissions in a table where `vendorConsents[284] = true` for direct O(1) lookups.
 4. **Dates**: We will return integers (Deciseconds since epoch) to match the spec and the Perl Golden File exactly.
-5. **Corpus Size**: Use uncompressed `golden.jsonl` for simplicity in PR 2/3. Consider future compression (e.g. pure-Lua DEFLATE) or binary formats to reduce git pressure.
+5. **Corpus Size**: Use partially optimized `golden.jsonl` (keeping `to_json` only for first 128 lines) to balance depth and repository weight.
