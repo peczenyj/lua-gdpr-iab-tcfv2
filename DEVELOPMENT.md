@@ -34,6 +34,7 @@ The test suite behavior can be customized using the following environment variab
 | `TCF_QUICK` | Set to `1` to run only a subset of the Golden Corpus (128 entries). | `0` |
 | `TCF_VERBOSE` | Set to `1` to enable verbose output (`-o gtest`) and show real-time Golden Corpus progress. | `0` |
 | `TCF_FULL_CORPUS` | Controls whether the entire Golden Corpus is scanned. Set to `0` to disable. | `1` |
+| `TCF_FUZZ` | Set to `1` to enable randomized vendor sampling during the Golden Corpus scan. | `0` |
 | `TCF_CONTINUE_ON_FAILURE` | Set to `1` to collect all corpus mismatches and report them at the end. | `0` |
 | `TCF_DEEP_LIMIT` | Number of entries at the start of the file to deep-compare. | `16` |
 | `TCF_SCAN_LIMIT` | Total number of lines to read in quick mode. | `128` |
@@ -42,14 +43,19 @@ The test suite behavior can be customized using the following environment variab
 
 ### Examples
 
-**Run standard tests (Full Corpus):**
+**Run standard deterministic tests (Full Corpus):**
 ```bash
 make test
 ```
 
-**Run quick tests (128 entries):**
+**Run quick deterministic tests (128 entries):**
 ```bash
 make test-quick
+```
+
+**Run randomized probabilistic tests (Fuzzing):**
+```bash
+make fuzz
 ```
 
 **Perform an exhaustive deep scan of the entire corpus, reporting all errors:**
@@ -60,10 +66,11 @@ TCF_CONTINUE_ON_FAILURE=1 make test
 ## Makefile Targets
 
 - `make setup`: Initialize local LuaRocks dependencies.
-- `make task`: Development loop (Format + Lint + Test).
-- `make ci`: CI verification (Verify Format + Lint + Test + Coverage).
-- `make test`: Run the full test suite (Full Golden Corpus scan).
+- `make task`: Development loop (Format + Lint + Test-Quick).
+- `make ci`: CI verification (Verify Format + Lint + Test).
+- `make test`: Run the full test suite (Deterministic Full Golden Corpus scan).
 - `make test-quick`: Run a fast subset of tests (128 entries).
+- `make fuzz`: Run full test suite with randomized vendor sampling enabled.
 - `make lint`: Run the linter (Luacheck).
 - `make format`: Apply code formatting (StyLua).
 - `make check-format`: Verify formatting without changing files.

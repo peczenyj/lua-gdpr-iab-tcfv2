@@ -35,7 +35,7 @@ else
   BUSTED_FLAGS =
 endif
 
-.PHONY: all test test-quick lint format check-format coverage changelog dist install clean setup ci task
+.PHONY: all test test-quick fuzz lint format check-format coverage changelog dist install clean setup ci task
 
 all: test
 
@@ -62,6 +62,9 @@ test:
 
 test-quick:
 	@$(ENV_SETUP) && export TCF_QUICK=1 && $(BUSTED) $(BUSTED_FLAGS) $(TEST_DIR)
+
+fuzz:
+	@$(ENV_SETUP) && export TCF_FUZZ=1 && $(BUSTED) $(BUSTED_FLAGS) $(TEST_DIR)
 
 lint:
 	@$(ENV_SETUP) && $(LUACHECK) $(SRC_DIR) $(TEST_DIR)

@@ -3,11 +3,11 @@ local parity = require("parity_helper")
 local tcf = require("gdpr.iab.tcfv2")
 
 -- Environment configuration
--- TCF_FULL_CORPUS is now 1 by default unless TCF_QUICK is set
 local FULL_CORPUS = os.getenv("TCF_FULL_CORPUS") ~= "0"
 local VERBOSE = os.getenv("TCF_VERBOSE") == "1"
 local CONTINUE_ON_FAILURE = os.getenv("TCF_CONTINUE_ON_FAILURE") == "1"
 local QUICK_MODE = os.getenv("TCF_QUICK") == "1"
+local FUZZ_MODE = os.getenv("TCF_FUZZ") == "1"
 
 if QUICK_MODE then
   FULL_CORPUS = false
@@ -60,7 +60,7 @@ describe("Golden Parity", function()
           error(string.format("Failed to parse: %s", tostring(p_err)))
         end
 
-        -- 1. Full Deep Comparison for the first X items OR all items if FULL_CORPUS
+        -- 1. Full Deep Comparison for requested items
         if count <= DEEP_LIMIT or FULL_CORPUS then
           local actual = parity.map_to_perl_shape(parser)
           local expected = data.tests.to_json
@@ -71,27 +71,29 @@ describe("Golden Parity", function()
           end
         end
 
-        -- 2. Randomized Fuzz/Sampling for other items (if doing quick scan)
+        -- 2. Header and Fuzz sampling for other items (Quick mode or Non-Deep)
         if not FULL_CORPUS and count > DEEP_LIMIT then
           local expected = data.tests.to_json
 
-          -- Verify Header Parity (Cheap)
+          -- Verify Header Parity (Deterministic, always run)
           assert.are.equal(expected.version, parser.version)
           assert.are.equal(expected.cmp_id, parser.cmpId)
           assert.are.equal(expected.policy_version, parser.policyVersion)
 
-          -- verify a random subset of vendor consents
-          for _ = 1, 5 do
-            local vid = math.random(1, 2000)
-            local actual_val = parser.vendorConsents[vid] == true
-            local expected_val = (
-              expected.vendor.consents[tostring(vid)] == true
-            )
-            assert.are.equal(
-              expected_val,
-              actual_val,
-              string.format("Vendor %d mismatch", vid)
-            )
+          -- 3. Randomized Fuzz/Sampling (Only enabled via TCF_FUZZ=1)
+          if FUZZ_MODE then
+            for _ = 1, 5 do
+              local vid = math.random(1, 2000)
+              local actual_val = parser.vendorConsents[vid] == true
+              local expected_val = (
+                expected.vendor.consents[tostring(vid)] == true
+              )
+              assert.are.equal(
+                expected_val,
+                actual_val,
+                string.format("Vendor %d mismatch", vid)
+              )
+            end
           end
         end
       end)
@@ -109,9 +111,9 @@ describe("Golden Parity", function()
         end
       end
 
-      -- 3. Global scan limit for dev speed in QUICK_MODE
+      -- Stop reading file if we are in QUICK mode and hit the limit
       if not FULL_CORPUS and count >= SCAN_LIMIT then
-        return true -- Stop reading file
+        return true
       end
     end)
 
