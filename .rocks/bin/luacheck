@@ -1,3 +1,0 @@
-#!/bin/sh
-
-LUAROCKS_SYSCONFDIR='/etc/luarocks' exec '/usr/bin/lua5.1' -e 'package.path="/home/tiago/work/lua/lua-gdpr-iab-tcfv2/.rocks/share/lua/5.1/?.lua;/home/tiago/work/lua/lua-gdpr-iab-tcfv2/.rocks/share/lua/5.1/?/init.lua;"..package.path;package.cpath="/home/tiago/work/lua/lua-gdpr-iab-tcfv2/.rocks/lib/lua/5.1/?.so;"..package.cpath;local k,l,_=pcall(require,"luarocks.loader") _=k and l.add_context("luacheck","1.2.0-1")' '/home/tiago/work/lua/lua-gdpr-iab-tcfv2/.rocks/lib/luarocks/rocks-5.1/luacheck/1.2.0-1/bin/luacheck' "$@"
