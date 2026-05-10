@@ -112,13 +112,6 @@ describe("Golden Parity", function()
 
     if #failures > 0 then
       local error_blob = table.concat(failures, "\n")
-      -- Limit output size if there are too many failures
-      if #failures > 20 then
-        error_blob = table.concat(failures, "\n", 1, 20)
-          .. "\n... (Total "
-          .. #failures
-          .. " failures)"
-      end
       error(
         "Corpus Parity Failed with " .. #failures .. " errors:\n" .. error_blob
       )

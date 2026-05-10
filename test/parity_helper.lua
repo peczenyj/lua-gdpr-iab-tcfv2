@@ -69,6 +69,15 @@ function M.map_to_perl_shape(p)
     },
   }
 
+  -- Phase 3 Mappings (Disclosed and Allowed Vendors)
+  -- The Perl shape expects vendor.disclosed and vendor.allowed
+  if p.vendorDisclosed then
+    res.vendor.disclosed = clean_table_to_perl_shape(p.vendorDisclosed) or {}
+  end
+  if p.vendorAllowed then
+    res.vendor.allowed = clean_table_to_perl_shape(p.vendorAllowed) or {}
+  end
+
   -- Publisher segment is special: it includes restrictions (from Core)
   -- and optional fields (from Type 3 segment).
   local publisher = {
@@ -76,8 +85,7 @@ function M.map_to_perl_shape(p)
       or {},
   }
 
-  -- We check for the presence of Type 3 specific fields to decide
-  -- if we include them in the mapped structure.
+  -- Only add these if the segment actually exists (non-nil)
   if p.pubPurposesConsent ~= nil then
     publisher.consents = clean_table_to_perl_shape(p.pubPurposesConsent) or {}
     publisher.legitimate_interests = clean_table_to_perl_shape(

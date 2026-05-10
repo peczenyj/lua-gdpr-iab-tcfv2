@@ -51,6 +51,7 @@ A zero-dependency, JIT-optimized Lua parser for IAB TCF v2.x.
 - [ ] Run full Golden Corpus suite (Verify MD5 consistency).
 - [ ] Implement `bench/` suite (Throughput, Latency, Memory churn).
 - [ ] JIT profiling in LuaJIT.
+- [ ] **Cross-platform verification**: Add macOS and Windows to CI matrix.
 
 ## 4. Open Questions / Technical Decisions
 1. **JSON for Tests**: I will use a minimal, single-file JSON library in `test/vendor/` strictly for reading the Golden File. Production code remains zero-dependency.
