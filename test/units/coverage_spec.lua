@@ -96,8 +96,10 @@ describe("Allowed Vendors (Type 2 Segment)", function()
   local base64 = require("gdpr.iab.tcfv2.base64")
 
   it("decodes Allowed Vendors segment correctly (Bitfield)", function()
-    local s =
-      "QLvNR_G__bXlv-bb36ftkeYxf9_hr7sQxBgbJs24FzLvW_JwX32E7NEzatqYKmRIEu3bBIQNtHJjURVChKIgVrzDsaEyUoTtKJ-BkiHMRY2NYCFxvm4tjWQCZ5vr_91d9mT-N7dr-2dzyy7hnv3a9_-S1WJidKYetHfv8ZBKT-_IU9_x-_4v4_N7pE2-eS1v_tGvt639-4vP_dpvxt-7yffz____73_e7X__d_______Xf_7_____________cAA"
+    local s = "QLvNR_G__bXlv-bb36ftkeYxf9_hr7sQxBgbJs24FzLvW_JwX32E7NEzatqYKmRIEu3bBI"
+      .. "QNtHJjURVChKIgVrzDsaEyUoTtKJ-BkiHMRY2NYCFxvm4tjWQCZ5vr_91d9mT-N7dr-2dzyy7"
+      .. "hnv3a9_-S1WJidKYetHfv8ZBKT-_IU9_x-_4v4_N7pE2-eS1v_tGvt639-4vP_dpvxt-7yffz"
+      .. "____73_e7X__d_______Xf_7_____________cAA"
     local data = base64.decode_url(s)
     local obj = AllowedVendors.new(data)
     assert.is_not_nil(obj)
@@ -108,8 +110,8 @@ describe("Allowed Vendors (Type 2 Segment)", function()
   end)
 
   it("decodes Allowed Vendors segment correctly (Range)", function()
-    local s =
-      "QKhwLIAFAAWAA0ACoAFwAOAAgABaADIAGgARQAmABQAC2AGEANoAgIBBgEIAI4AVoA5AB3ADxAH6AScApoBnADTgG8AToAn8BTYC4QF5gMZAbmA44ByYEJAIzASNAkyBSUClYFQw"
+    local s = "QKhwLIAFAAWAA0ACoAFwAOAAgABaADIAGgARQAmABQAC2AGEANoAgIBBgEIAI4AVoA5AB3AD"
+      .. "xAH6AScApoBnADTgG8AToAn8BTYC4QF5gMZAbmA44ByYEJAIzASNAkyBSUClYFQw"
     local data = base64.decode_url(s)
     local obj = AllowedVendors.new(data)
     assert.is_not_nil(obj)
@@ -120,8 +122,10 @@ describe("Allowed Vendors (Type 2 Segment)", function()
   end)
 
   it("supports targetVendors optimization in Allowed Vendors", function()
-    local s =
-      "QLvNR_G__bXlv-bb36ftkeYxf9_hr7sQxBgbJs24FzLvW_JwX32E7NEzatqYKmRIEu3bBIQNtHJjURVChKIgVrzDsaEyUoTtKJ-BkiHMRY2NYCFxvm4tjWQCZ5vr_91d9mT-N7dr-2dzyy7hnv3a9_-S1WJidKYetHfv8ZBKT-_IU9_x-_4v4_N7pE2-eS1v_tGvt639-4vP_dpvxt-7yffz____73_e7X__d_______Xf_7_____________cAA"
+    local s = "QLvNR_G__bXlv-bb36ftkeYxf9_hr7sQxBgbJs24FzLvW_JwX32E7NEzatqYKmRIEu3bBI"
+      .. "QNtHJjURVChKIgVrzDsaEyUoTtKJ-BkiHMRY2NYCFxvm4tjWQCZ5vr_91d9mT-N7dr-2dzyy7"
+      .. "hnv3a9_-S1WJidKYetHfv8ZBKT-_IU9_x-_4v4_N7pE2-eS1v_tGvt639-4vP_dpvxt-7yffz"
+      .. "____73_e7X__d_______Xf_7_____________cAA"
     local data = base64.decode_url(s)
     local obj = AllowedVendors.new(data, { targetVendors = { 284 } })
     assert.is_not_nil(obj)
