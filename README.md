@@ -32,12 +32,22 @@ if not parser then
     print("Error: " .. err)
     return
 end
-
+```lua
 print(parser.cmpId)
 print(parser.vendorConsents[284]) -- true/false
 ```
 
 ## Development
+
+### First-time Setup
+To set up the development environment, ensure you have **LuaRocks** installed, then run:
+
+```bash
+make setup
+```
+
+The `Makefile` is configured to automatically include local dependencies from `.rocks/` in the `LUA_PATH` and `PATH` for all tasks (`make test`, `make lint`, etc.).
+
 See [TODO.md](TODO.md) for the project roadmap and [AGENTS.md](AGENTS.md) for technical conventions.
 
 ## License

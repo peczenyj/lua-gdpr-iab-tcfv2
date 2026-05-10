@@ -1,3 +1,4 @@
+rockspec_format = "3.0"
 package = "lua-gdpr-iab-tcfv2"
 version = "0.1.0-1"
 source = {
@@ -15,6 +16,11 @@ description = {
 dependencies = {
    "lua >= 5.1"
 }
+test_dependencies = {
+   "busted",
+   "luacheck",
+   "luacov"
+}
 build = {
    type = "builtin",
    modules = {
@@ -23,4 +29,7 @@ build = {
       ["gdpr.iab.tcfv2.base64"] = "src/base64.lua",
       ["gdpr.iab.tcfv2.bitstream"] = "src/bitstream.lua"
    }
+}
+test = {
+   type = "busted"
 }
