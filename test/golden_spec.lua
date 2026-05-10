@@ -1,5 +1,5 @@
-local harness = require("test.golden_harness")
-local parity = require("test.parity_helper")
+local harness = require("golden_harness")
+local parity = require("parity_helper")
 local tcf = require("gdpr.iab.tcfv2")
 
 describe("Golden Parity", function()
