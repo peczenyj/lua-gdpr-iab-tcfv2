@@ -13,24 +13,24 @@ local function clean_table_to_perl_shape(t)
     return t
   end
   local res = {}
-  local is_empty = true
+  local has_data = false
   for k, v in pairs(t) do
     if v == true then
       res[tostring(k)] = true
-      is_empty = false
+      has_data = true
     elseif type(v) == "number" then
       res[tostring(k)] = v
-      is_empty = false
+      has_data = true
     elseif type(v) == "table" then
       local cleaned = clean_table_to_perl_shape(v)
-      if cleaned then
+      if cleaned and next(cleaned) ~= nil then
         res[tostring(k)] = cleaned
-        is_empty = false
+        has_data = true
       end
     end
   end
-  if is_empty then
-    return {}
+  if not has_data then
+    return nil
   end
   return res
 end
@@ -54,33 +54,44 @@ function M.map_to_perl_shape(p)
 
     special_features_opt_in = clean_table_to_perl_shape(
       p.specialFeaturesOptIn or {}
-    ),
+    ) or {},
     purpose = {
-      consents = clean_table_to_perl_shape(p.purposeConsents or {}),
+      consents = clean_table_to_perl_shape(p.purposeConsents or {}) or {},
       legitimate_interests = clean_table_to_perl_shape(
         p.purposeLegitimateInterests or {}
-      ),
+      ) or {},
     },
     vendor = {
-      consents = clean_table_to_perl_shape(p.vendorConsents or {}),
+      consents = clean_table_to_perl_shape(p.vendorConsents or {}) or {},
       legitimate_interests = clean_table_to_perl_shape(
         p.vendorLegitimateInterests or {}
-      ),
-    },
-    publisher = {
-      consents = clean_table_to_perl_shape(p.pubPurposesConsent or {}),
-      legitimate_interests = clean_table_to_perl_shape(
-        p.pubPurposesLITransparency or {}
-      ),
-      restrictions = clean_table_to_perl_shape(p.publisherRestrictions or {}),
-      custom_purposes = {
-        consents = clean_table_to_perl_shape(p.customPurposesConsent or {}),
-        legitimate_interests = clean_table_to_perl_shape(
-          p.customPurposesLITransparency or {}
-        ),
-      },
+      ) or {},
     },
   }
+
+  -- Publisher segment is special: it includes restrictions (from Core)
+  -- and optional fields (from Type 3 segment).
+  local publisher = {
+    restrictions = clean_table_to_perl_shape(p.publisherRestrictions or {})
+      or {},
+  }
+
+  -- We check for the presence of Type 3 specific fields to decide
+  -- if we include them in the mapped structure.
+  if p.pubPurposesConsent ~= nil then
+    publisher.consents = clean_table_to_perl_shape(p.pubPurposesConsent) or {}
+    publisher.legitimate_interests = clean_table_to_perl_shape(
+      p.pubPurposesLITransparency
+    ) or {}
+    publisher.custom_purposes = {
+      consents = clean_table_to_perl_shape(p.customPurposesConsent) or {},
+      legitimate_interests = clean_table_to_perl_shape(
+        p.customPurposesLITransparency
+      ) or {},
+    }
+  end
+
+  res.publisher = publisher
 
   return res
 end
@@ -129,8 +140,6 @@ function M.deep_compare(actual, expected, path)
   for k, v in pairs(actual) do
     local ek = tostring(k)
     if expected[ek] == nil then
-      -- Perl JSON might omit false values, but we already cleaned them.
-      -- If it's in actual, it should be in expected.
       return false,
         string.format("%s: unexpected key in actual result", path .. "." .. ek)
     end

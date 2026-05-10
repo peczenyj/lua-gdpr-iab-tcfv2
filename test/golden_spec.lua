@@ -57,9 +57,19 @@ describe("Golden Parity", function()
 
       -- 1. Full Deep Comparison for the first X items
       if count <= DEEP_LIMIT or FULL_CORPUS then
-        local actual = parity.map_to_perl_shape(parser:to_table())
+        -- Pass the parser object itself to parity helper to handle lazy loading
+        local actual = parity.map_to_perl_shape(parser)
         local expected = data.tests.to_json
         local ok, diff_err = parity.deep_compare(actual, expected)
+
+        if not ok then
+          print("\n--- ASSERTION FAILURE ---")
+          print(string.format("Line: %d", count))
+          print(string.format("TC String: %s", data.tc_string))
+          print(string.format("Error: %s", tostring(diff_err)))
+          print("-------------------------\n")
+        end
+
         assert.is_true(
           ok,
           string.format(
