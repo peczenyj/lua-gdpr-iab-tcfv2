@@ -1,28 +1,28 @@
-# Luacheck configuration
-# See: https://luacheck.readthedocs.io/en/stable/config.html
+-- Luacheck configuration
+-- See: https://luacheck.readthedocs.io/en/stable/config.html
 
-# Global settings
+-- Global settings
 std = "lua51+lua52+lua53+lua54+luajit"
 unused_args = false
 redefined = false
 
-# Ignore specific warnings
+-- Ignore specific warnings
 ignore = {
-    "611", # line contains only whitespace
+  "611", -- line contains only whitespace
 }
 
-# Per-file overrides
+-- Per-file overrides
 files["test/*.lua"] = {
-    globals = {
-        "describe",
-        "it",
-        "before_each",
-        "after_each",
-        "setup",
-        "teardown",
-        "assert",
-        "stub",
-        "spy",
-        "match",
-    }
+  globals = {
+    "describe",
+    "it",
+    "before_each",
+    "after_each",
+    "setup",
+    "teardown",
+    "assert",
+    "stub",
+    "spy",
+    "match",
+  },
 }
