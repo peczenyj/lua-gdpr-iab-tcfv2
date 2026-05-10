@@ -1,6 +1,9 @@
 # Makefile for lua-gdpr-iab-tcfv2
 
-LUA_VERSION ?= 5.4
+# Detect Lua version from the system if not provided
+LUA_BIN      ?= lua
+LUA_VERSION  ?= $(shell $(LUA_BIN) -e 'print(_VERSION:match("%d+%.%d+"))' 2>/dev/null || echo 5.4)
+
 LUA          = lua$(LUA_VERSION)
 LUAROCKS     = luarocks
 LUACHECK     = luacheck
@@ -17,10 +20,12 @@ VERSION      = 0.1.0
 # Local dependencies path
 ROCKS_PATH   = ./.rocks
 ROCKS_LUA    = $(ROCKS_PATH)/share/lua/$(LUA_VERSION)/?.lua
+ROCKS_CLUA   = $(ROCKS_PATH)/lib/lua/$(LUA_VERSION)/?.so
 ROCKS_BIN    = $(ROCKS_PATH)/bin
 
 # Environment setup for local dependencies
 ENV_SETUP    = export LUA_PATH="$(ROCKS_LUA);./src/?.lua;./?.lua;;" && \
+               export LUA_CPATH="$(ROCKS_CLUA);;" && \
                export PATH="$(ROCKS_BIN):$$PATH"
 
 .PHONY: all test lint format coverage changelog dist install clean setup
@@ -28,8 +33,10 @@ ENV_SETUP    = export LUA_PATH="$(ROCKS_LUA);./src/?.lua;./?.lua;;" && \
 all: test
 
 setup:
-	@echo "Installing development dependencies..."
+	@echo "Detected Lua version: $(LUA_VERSION)"
+	@echo "Installing development and test dependencies..."
 	$(LUAROCKS) install --only-deps --tree $(ROCKS_PATH) *.rockspec
+	$(LUAROCKS) test --only-deps --tree $(ROCKS_PATH) *.rockspec
 	@echo "Dependencies installed in $(ROCKS_PATH)/"
 	@echo "The Makefile will now automatically use them for 'make test', 'make lint', etc."
 
