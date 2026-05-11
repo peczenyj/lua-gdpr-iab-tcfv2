@@ -3,5 +3,7 @@
 luacov.*.out
 luacov.report.out
 *.tar.gz
+*.src.rock
+*.rock
 *.rockspec.lock
 bench/profile_results.txt
