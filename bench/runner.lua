@@ -1,5 +1,6 @@
 local tcf = require("gdpr.iab.tcfv2")
 local Validator = tcf.Validator
+local harness = require("test.reference.golden_harness")
 
 -- Use os.clock() for CPU time measurement
 local function bench(name, fn, iterations)
@@ -81,3 +82,33 @@ local p_opt = tcf.new(base_string, { targetVendors = { 284 } })
 bench("Validator: use optimized parser", function()
   v:validate(p_opt)
 end)
+
+-- 4. Corpus Scan Benchmark
+local function run_corpus_scan()
+  local count = 0
+  harness.read_golden(function(data)
+    if data.expect_failure then
+      return
+    end
+    tcf.new(data.tc_string)
+    count = count + 1
+  end)
+  return count
+end
+
+-- We measure one full pass of the 1024 strings
+local start = os.clock()
+local total_parsed = run_corpus_scan()
+local duration = os.clock() - start
+local ops_sec = total_parsed / duration
+local latency_us = (duration / total_parsed) * 1000000
+
+print(
+  string.format(
+    "%-30s | %10.2f ops/s | %10.2f us/op (%d strings)",
+    "Corpus: Sequential Scan",
+    ops_sec,
+    latency_us,
+    total_parsed
+  )
+)
