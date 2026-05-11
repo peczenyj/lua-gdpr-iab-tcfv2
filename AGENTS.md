@@ -14,10 +14,10 @@ Optimized for high-performance middleware environments like **OpenResty** and **
 2. **Release Process**: Releases are made from `devel` to `main`. Tags (`v*`) trigger automated release artifacts (.tar.gz) and potentially Luarocks uploads.
 3. **Commit Messages**: Follow Conventional Commits: `type(scope): short description`.
    - Types: `feat`, `fix`, `docs`, `style`, `refactor`, `test`, `chore`.
-4. **CI/CD**: GitHub Actions on Linux (Matrix: 5.1, 5.2, 5.3, 5.4, LuaJIT, OpenResty) must pass.
+4. **CI/CD**: GitHub Actions on Linux (Matrix: 5.1, 5.2, 5.3, 5.4, 5.5, LuaJIT, OpenResty) and macOS (5.4, LuaJIT) must pass.
 
 ## Technical Rules & Conventions
-1. **Lua Compatibility**: Compatible with Lua 5.1, 5.2, 5.3, 5.4, and LuaJIT.
+1. **Lua Compatibility**: Compatible with Lua 5.1, 5.2, 5.3, 5.4, 5.5, and LuaJIT.
    - **Package Structure**: Source files are in `src/gdpr/iab/tcfv2/` mapping to the `gdpr.iab.tcfv2` module.
    - **Zero-dependency**: No external libraries allowed in `src/`. Use internal bridges for bitwise and Base64.
 2. **Architecture**: **Lazy/On-demand decoding** with caching via metatables.

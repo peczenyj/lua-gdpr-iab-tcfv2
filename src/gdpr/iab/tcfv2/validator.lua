@@ -15,7 +15,13 @@ Validator.__index = Validator
 -- @param[opt] config.consent_purpose_ids table List of purpose IDs requiring explicit consent.
 -- @param[opt] config.legitimate_interest_purpose_ids table List of purpose IDs requiring legitimate interest.
 -- @param[opt] config.flexible_purpose_ids table List of purpose IDs that can switch legal basis.
--- @param[opt] config.verify_disclosed_vendors boolean Ensure vendor is in the Disclosed Vendors segment.
+-- @param[opt] config.verify_disclosed_vendors boolean Ensure vendor is in the
+--   Disclosed Vendors segment. When the segment is present, the vendor must
+--   appear there or the rule fails. When the segment is absent, behavior
+--   depends on `min_tcf_policy_version`: with a floor of 5 or higher
+--   (TCF v2.3+) the segment is treated as mandatory and absence fails;
+--   otherwise absence is silently tolerated. Matches the Perl reference
+--   implementation's gating.
 -- @param[opt] config.min_tcf_policy_version integer Minimum required TCF Policy version.
 -- @param[opt] config.strict_legal_basis boolean Throw error on invalid purpose combinations.
 -- @return table Validator instance.

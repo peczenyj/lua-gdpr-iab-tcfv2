@@ -10,10 +10,11 @@ description = {
    detailed = [[
       lua-gdpr-iab-tcfv2 is a production-ready, JIT-optimized Lua library for handling
       IAB Transparency and Consent Framework (TCF) v2.x strings.
-      
+
       It is specifically designed for high-throughput middleware environments such as
       OpenResty and HAProxy, featuring lazy decoding, zero external dependencies,
-      and 100% logical parity with the Perl reference implementation.
+      and validator-decision parity with the Perl reference implementation verified
+      across a 1,024-row Golden Corpus.
    ]],
    homepage = "https://github.com/peczenyj/lua-gdpr-iab-tcfv2",
    license = "MIT",
