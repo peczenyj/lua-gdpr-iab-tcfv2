@@ -154,8 +154,11 @@ describe("Validator", function()
         verify_disclosed_vendors = true,
         min_tcf_policy_version = 5,
       })
-      -- tc_string has NO disclosed segment (it is version 2, policy 2 in some fields)
-      -- but we force min_policy 5.
+      -- tc_string is policy version 5 (TCF v2.3) with no Disclosed Vendors
+      -- segment. Per the Perl reference (Validator.pm _check_disclosed), the
+      -- missing-mandatory-segment failure only fires when the caller
+      -- explicitly demands min_tcf_policy_version >= 5; otherwise absence is
+      -- silently tolerated. This test verifies that gating.
       local ok, err = v:validate(tc_string)
       assert.is_false(ok)
       assert.are.equal(
