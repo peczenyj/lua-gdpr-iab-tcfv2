@@ -149,7 +149,16 @@ end
 function Validator:validate(tc_string_or_obj, overrides)
   local conf = self.config
   if overrides then
-    conf = setmetatable(overrides, { __index = self.config })
+    -- Build a fresh merged config rather than installing a metatable on the
+    -- caller's `overrides` table -- mutating user-provided tables is
+    -- surprising and would leak the __index across calls if reused.
+    conf = {}
+    for k, v in pairs(self.config) do
+      conf[k] = v
+    end
+    for k, v in pairs(overrides) do
+      conf[k] = v
+    end
   end
 
   local parser, err =
@@ -163,17 +172,19 @@ function Validator:validate(tc_string_or_obj, overrides)
     return false, "missing vendor_id"
   end
 
-  -- 1. Min TCF Policy Version Check
-  if
-    conf.min_tcf_policy_version
-    and parser.policyVersion < conf.min_tcf_policy_version
-  then
-    return false,
-      string.format(
-        "policy version %d is less than required %d",
-        parser.policyVersion,
-        conf.min_tcf_policy_version
-      )
+  -- 1. Min TCF Policy Version Check. policyVersion can be nil in lenient
+  -- mode when the core segment is truncated; treat nil as failing the
+  -- floor (fail-closed -- we can't verify the requirement).
+  if conf.min_tcf_policy_version then
+    local pv = parser.policyVersion
+    if pv == nil or pv < conf.min_tcf_policy_version then
+      return false,
+        string.format(
+          "policy version %s is less than required %d",
+          tostring(pv),
+          conf.min_tcf_policy_version
+        )
+    end
   end
 
   -- 2. Consent Purpose Checks

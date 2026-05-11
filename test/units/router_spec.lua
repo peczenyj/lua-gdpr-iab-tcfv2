@@ -28,12 +28,35 @@ describe("Multi-Segment Router", function()
     assert.are.equal(0, parser.numCustomPurposes)
   end)
 
-  it("handles Disclosed Vendors (Type 1) - Mock", function()
-    -- Type 1: bits 001...
-    -- Let's say max_id=1, bitfield, vendor 1 has consent.
-    -- bits: 001 (type) | 0000000000000001 (max_id=1) | 0 (bitfield) | 1 (vendor 1) | 0000 (padding to 6 bits)
-    -- 00100000 00000000 01010000 -> 0x20 0x00 0x50
-    -- base64: IAAVA (roughly)
-    -- Actually let's just use a real-ish one if I can find one or just trust the logic.
-  end)
+  it(
+    "appends a warning when a non-core segment has invalid base64 (lenient)",
+    function()
+      -- "@" is outside the base64url alphabet, so the trailing segment will
+      -- fail base64 decoding. Lenient mode (default) should not error;
+      -- instead it appends the failure to parser.warnings via core.warnings.
+      local parser = tcf.new(tc_string .. ".@@@@@@@@")
+      assert.is_not_nil(parser)
+      assert.is_true(
+        #parser.warnings > 0,
+        "expected a warning for the malformed trailing segment"
+      )
+      local found = false
+      for _, w in ipairs(parser.warnings) do
+        if w:match("invalid base64 in segment") then
+          found = true
+          break
+        end
+      end
+      assert.is_true(found, "warning should reference invalid base64 segment")
+    end
+  )
+
+  it(
+    "fails in strict mode when a non-core segment has invalid base64",
+    function()
+      local parser, err = tcf.new(tc_string .. ".@@@@@@@@", { strict = true })
+      assert.is_nil(parser)
+      assert.match("invalid base64 in segment", err)
+    end
+  )
 end)
