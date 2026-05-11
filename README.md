@@ -124,7 +124,7 @@ Measures the time to initialize a new TCF object from a raw string.
 | :--- | :--- | :--- | :--- |
 | **Simple Parse** | ~30,000 ops/s | ~33 µs/op | Standard Core segment. |
 | **Complex Parse** | ~23,000 ops/s | ~42 µs/op | Multi-segment string. |
-| **Full Corpus Scan** | **~5,700 ops/s** | **~174 µs/op** | 1,024 unique real-world strings. |
+| **Full Corpus Scan** | **~2,200 ops/s** | **~450 µs/op** | 1,024 strings; includes per-row file IO + JSON decode. |
 
 ### Data Access & Transformation
 Measures the overhead of accessing lazy fields and full object dumps.
