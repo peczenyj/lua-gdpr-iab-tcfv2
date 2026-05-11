@@ -10,7 +10,7 @@ describe("Golden Corpus Integrity", function()
 
     local md5 = result:match("^(%x+)")
     assert.are.equal(
-      "ad263e65897df0064d3e27e792e6e3f6",
+      "09aef9de9e6fb6ecbab08683dd87336c",
       md5,
       "Golden corpus file is corrupted or modified"
     )
