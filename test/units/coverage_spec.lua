@@ -24,11 +24,14 @@ describe("Validator Error Paths and Edge Cases", function()
     assert.are.equal("missing vendor_id", err)
   end)
 
-  it("handles is_in_table returning false when value not found", function()
+  it("non-flexible purpose follows the standard consent path", function()
+    -- Previously this test wired flexible_purpose_ids = { 2 } with
+    -- consent_purpose_ids = { 1 } -- a coherence violation after Phase 4
+    -- (orphan flexibles now raise in the constructor). The intent here is
+    -- just to verify the happy-path consent flow when no flex flag applies.
     local v = Validator.new({
       vendor_id = 284,
       consent_purpose_ids = { 1 },
-      flexible_purpose_ids = { 2 }, -- 1 is not here
     })
     local ok, err = v:validate(base_string)
     assert.is_true(ok, err)
@@ -54,7 +57,10 @@ describe("Validator Error Paths and Edge Cases", function()
       local v = Validator.new({ vendor_id = 284, consent_purpose_ids = { 1 } })
       local ok, err = v:validate(parser)
       assert.is_false(ok)
-      assert.are.equal("purpose 1 is restricted for vendor 284", err)
+      assert.are.equal(
+        "publisher restriction: purpose 1 not allowed (vendor 284)",
+        err
+      )
     end)
 
     it(
@@ -73,7 +79,10 @@ describe("Validator Error Paths and Edge Cases", function()
         })
         local ok, err = v:validate(parser)
         assert.is_false(ok)
-        assert.are.equal("purpose 2 requires consent for vendor 284", err)
+        assert.are.equal(
+          "publisher restriction: purpose 2 requires consent (vendor 284)",
+          err
+        )
       end
     )
 
@@ -86,7 +95,7 @@ describe("Validator Error Paths and Edge Cases", function()
       local ok, err = v:validate(parser)
       assert.is_false(ok)
       assert.are.equal(
-        "purpose 1 requires legitimate interest for vendor 284",
+        "publisher restriction: purpose 1 requires legitimate interest (vendor 284)",
         err
       )
     end)
