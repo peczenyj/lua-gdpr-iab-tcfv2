@@ -1,2 +1,7 @@
 .rocks/
+.rocks_verify/
 luacov.*.out
+luacov.report.out
+*.tar.gz
+*.rockspec.lock
+bench/profile_results.txt

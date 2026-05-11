@@ -64,7 +64,7 @@ if f then
   local line_count = 0
   for line in f:lines() do
     if line_count < 20 then
-       print(line)
+      print(line)
     end
     line_count = line_count + 1
   end

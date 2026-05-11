@@ -1,1 +1,23 @@
+# Default to LF line endings, auto-detect text vs binary.
+* text=auto eol=lf
+
+# Treat compressed/serialized corpora as binary (no diffs, no EOL conversion).
 *.jsonl binary
+
+# Keep release tarballs slim: exclude developer-only paths.
+.github/        export-ignore
+.gitattributes  export-ignore
+.gitignore      export-ignore
+.editorconfig   export-ignore
+.luacheckrc     export-ignore
+.luacov         export-ignore
+.stylua.toml    export-ignore
+.proverc        export-ignore
+AGENTS.md       export-ignore
+TODO.md         export-ignore
+cliff.toml      export-ignore
+bench/          export-ignore
+docs/           export-ignore
+scripts/        export-ignore
+test/           export-ignore
+tools/          export-ignore
