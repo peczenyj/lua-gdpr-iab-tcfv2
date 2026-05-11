@@ -1,33 +1,30 @@
-name: Linux Tests
+name: Continuous Integration
 
 on:
   push:
-    branches: [ devel, main, "exp/*" ]
+    branches: [ devel, main ]
+    tags: [ "v*" ]
   pull_request:
-    branches: [ devel, main, "exp/*" ]
+    branches: [ devel, main ]
 
 jobs:
-  test:
+  test-linux:
+    name: test (Linux, ${{ matrix.luaVersion }})
     runs-on: ubuntu-22.04
-
     strategy:
       fail-fast: false
       matrix:
         luaVersion: ["5.5", "5.4", "5.3", "5.2", "5.1", "luajit", "luajit-openresty"]
-
     steps:
     - uses: actions/checkout@v4
-    
     - name: Setup Lua
       uses: hishamhm/gh-actions-lua@master
       with:
         luaVersion: ${{ matrix.luaVersion }}
-
     - name: Setup LuaRocks
       uses: hishamhm/gh-actions-luarocks@master
       with:
         luaRocksVersion: "3.13.0"
-
     - name: Install StyLua
       run: |
         STYLUA_VERSION=v0.20.0
@@ -35,64 +32,96 @@ jobs:
         unzip stylua-linux-x86_64.zip
         chmod +x stylua
         sudo mv stylua /usr/local/bin/
-
     - name: Install Dev Dependencies
       run: |
         luarocks install busted
         luarocks install luacov
         luarocks install luacov-coveralls
-
     - name: Run CI (Format Check, Test)
       run: |
         LUA_EXEC="lua"
         if [[ "${{ matrix.luaVersion }}" == "luajit"* ]]; then
           LUA_EXEC="luajit"
         fi
-        
-        # Performance/Exhaustive Logic:
-        # Standard Lua versions run TCF_QUICK=1 (128 entries) to stay fast.
-        # High-performance versions (5.5, JIT) run FULL SCAN (100k+ entries).
         export TCF_VERBOSE=0
         export TCF_CONTINUE_ON_FAILURE=1
-        
         if [[ "${{ matrix.luaVersion }}" == "5.5" || "${{ matrix.luaVersion }}" == "luajit"* ]]; then
-          echo "Executing FULL exhaustive verification scan..."
           export TCF_QUICK=0
         else
-          echo "Executing quick verification scan..."
           export TCF_QUICK=1
         fi
+        make check-format LUA_BIN=$LUA_EXEC
+        make test LUA_BIN=$LUA_EXEC
+        make test-reference LUA_BIN=$LUA_EXEC
+        make test-fuzz LUA_BIN=$LUA_EXEC
+    - name: Report Coverage
+      if: success()
+      run: |
+        make coverage
+        make report-coverage
+      env:
+        COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
+    - name: Verify Rockspec
+      run: luarocks make --tree .rocks_verify *.rockspec
 
+  test-macos:
+    name: test (macOS, ${{ matrix.luaVersion }})
+    runs-on: macos-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        luaVersion: ["5.4", "luajit"]
+    steps:
+    - uses: actions/checkout@v4
+    - name: Setup Lua
+      uses: hishamhm/gh-actions-lua@master
+      with:
+        luaVersion: ${{ matrix.luaVersion }}
+    - name: Setup LuaRocks
+      uses: hishamhm/gh-actions-luarocks@master
+      with:
+        luaRocksVersion: "3.13.0"
+    - name: Install StyLua
+      run: brew install stylua
+    - name: Install Dev Dependencies
+      run: |
+        luarocks install busted
+        luarocks install luacov
+    - name: Run CI (Format Check, Test)
+      run: |
+        LUA_EXEC="lua"
+        if [[ "${{ matrix.luaVersion }}" == "luajit"* ]]; then
+          LUA_EXEC="luajit"
+        fi
+        export TCF_VERBOSE=0
+        export TCF_CONTINUE_ON_FAILURE=1
+        if [[ "${{ matrix.luaVersion }}" == "luajit"* ]]; then
+          export TCF_QUICK=0
+        else
+          export TCF_QUICK=1
+        fi
         make check-format LUA_BIN=$LUA_EXEC
         make test LUA_BIN=$LUA_EXEC
         make test-reference LUA_BIN=$LUA_EXEC
         make test-fuzz LUA_BIN=$LUA_EXEC
 
-    - name: Report Coverage
-      if: success()
-      run: |
-        # We run unit tests with coverage and report
-        make coverage
-        make report-coverage
-      env:
-        COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
-
-    - name: Verify Rockspec
-      run: |
-        # Ensure the rockspec can be built and installed
-        luarocks make --tree .rocks_verify *.rockspec
-
   release:
-    needs: test
+    needs: [test-linux, test-macos]
     if: startsWith(github.ref, 'refs/tags/v')
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
-    
+    - name: Setup Lua
+      uses: hishamhm/gh-actions-lua@master
+      with:
+        luaVersion: "5.4"
+    - name: Setup LuaRocks
+      uses: hishamhm/gh-actions-luarocks@master
+      with:
+        luaRocksVersion: "3.13.0"
     - name: Create Release Artifacts
       run: make dist
-      
-    - name: Upload Release Artifacts
+    - name: Upload GitHub Release
       uses: softprops/action-gh-release@v2
       with:
         files: |
@@ -100,3 +129,5 @@ jobs:
           *.rockspec
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    - name: Publish to LuaRocks
+      run: luarocks upload *.rockspec --api-key=${{ secrets.LUAROCKS_APIKEY }}

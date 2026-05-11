@@ -2,6 +2,7 @@
 set -e
 
 # optimize_golden.sh: Deterministically strip to_json data from large corpus files.
+# Extracts only necessary fields for global fuzzing.
 # Usage: ./scripts/optimize_golden.sh [-f <limit>] <source_file> <destination_file>
 
 RICH_LIMIT=128
@@ -49,13 +50,19 @@ else
     cp "$SOURCE" "$RAW_SOURCE"
 fi
 
-echo "Optimizing corpus (keeping first $RICH_LIMIT lines intact with 'to_json')..."
+echo "Optimizing corpus..."
+echo "  -> Keeping first $RICH_LIMIT lines intact with full 'to_json'"
+echo "  -> Extracting vendor data to 'tests.fuzz' for all lines"
 
-# 1. Capture the first RICH_LIMIT lines (full data)
-head -n "$RICH_LIMIT" "$RAW_SOURCE" > "$DESTINATION"
+# Transformation: 
+# 1. Add .tests.fuzz from .tests.to_json.vendor
+# 2. If line number > RICH_LIMIT, delete .tests.to_json
+# 3. Always delete to_json from the output to save space? No, keep RICH_LIMIT as requested.
 
-# 2. Process the remaining lines: remove tests.to_json
-tail -n +"$((RICH_LIMIT + 1))" "$RAW_SOURCE" | jq -c 'del(.tests.to_json)' >> "$DESTINATION"
+jq -c "
+  .tests.fuzz = .tests.to_json.vendor | 
+  if (input_line_number > $RICH_LIMIT) then del(.tests.to_json) else . end
+" "$RAW_SOURCE" > "$DESTINATION"
 
 echo "Success: Optimized corpus saved to $DESTINATION"
 echo "New MD5: $(md5sum "$DESTINATION" | cut -d' ' -f1)"
