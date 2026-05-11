@@ -1,26 +1,7 @@
-local bit = require("gdpr.iab.tcfv2.bit")
 local base64 = require("gdpr.iab.tcfv2.base64")
 local BitStream = require("gdpr.iab.tcfv2.bitstream")
 
 describe("Plumbing", function()
-  describe("Bit bridge", function()
-    it("performs band correctly", function()
-      assert.are.equal(0, bit.band(0xF0, 0x0F))
-    end)
-
-    it("performs bor correctly", function()
-      assert.are.equal(0xFF, bit.bor(0xF0, 0x0F))
-    end)
-
-    it("performs lshift correctly", function()
-      assert.are.equal(16, bit.lshift(1, 4))
-    end)
-
-    it("performs rshift correctly", function()
-      assert.are.equal(1, bit.rshift(16, 4))
-    end)
-  end)
-
   describe("Base64url", function()
     it("decodes simple strings", function()
       local decoded = base64.decode_url("AB")

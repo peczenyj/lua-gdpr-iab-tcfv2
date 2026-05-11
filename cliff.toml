@@ -46,6 +46,8 @@ protect_breaking_commits = false
 filter_commits = false
 
 commit_parsers = [
+    { message = "^Merge", skip = true },
+    { message = "^chore\\(release\\)", skip = true },
     { message = "^feat", group = "Features" },
     { message = "^fix", group = "Bug Fixes" },
     { message = "^doc", group = "Documentation" },

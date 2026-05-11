@@ -21,6 +21,9 @@ TEST_UNITS     = test/units
 TEST_REFERENCE = test/reference
 TEST_FUZZ      = test/fuzz
 
+# Auxiliary source dirs included in lint/format
+BENCH_DIR    = bench
+
 # Local dependencies path
 ROCKS_PATH   = ./.rocks
 ROCKS_LUA    = $(ROCKS_PATH)/share/lua/$(LUA_VERSION)/?.lua;$(ROCKS_PATH)/share/lua/$(LUA_VERSION)/?/init.lua
@@ -76,13 +79,13 @@ test-fuzz:
 	@$(ENV_SETUP) && $(BUSTED) $(BUSTED_FLAGS) $(TEST_FUZZ)
 
 lint:
-	@$(ENV_SETUP) && $(LUACHECK) $(SRC_DIR) $(TEST_UNITS) $(TEST_REFERENCE) $(TEST_FUZZ)
+	@$(ENV_SETUP) && $(LUACHECK) $(SRC_DIR) $(TEST_UNITS) $(TEST_REFERENCE) $(TEST_FUZZ) $(BENCH_DIR)
 
 format:
-	@$(STYLUA) $(SRC_DIR) $(TEST_UNITS) $(TEST_REFERENCE) $(TEST_FUZZ)
+	@$(STYLUA) $(SRC_DIR) $(TEST_UNITS) $(TEST_REFERENCE) $(TEST_FUZZ) $(BENCH_DIR)
 
 check-format:
-	@$(STYLUA) --check $(SRC_DIR) $(TEST_UNITS) $(TEST_REFERENCE) $(TEST_FUZZ)
+	@$(STYLUA) --check $(SRC_DIR) $(TEST_UNITS) $(TEST_REFERENCE) $(TEST_FUZZ) $(BENCH_DIR)
 
 coverage:
 	@$(ENV_SETUP) && $(BUSTED) $(BUSTED_FLAGS) --coverage $(TEST_UNITS)

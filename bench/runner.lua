@@ -24,21 +24,21 @@ local function bench(name, fn, iterations)
 end
 
 -- Representative TC strings
-local base_string =
-  "CP188cAQKFpAAAHABBENBSFsAP_gAEPgAAiQKqNX_H__bW9r8X73aft0eY1P9_j77uQxBhfJE-4"
+local base_string = "CP188cAQKFpAAAHABBENBSFsAP_gAEPgAAiQKqNX_H__bW9r8X73aft0eY1P9_j77uQxBhfJE-4"
   .. "FzLvW_JwXx2ExNA36tqIKmRIEu3bBIQNlHJHUTVigaogVryHMak2cpTNKJ6BkiFMRM2dYCF5vm4tj-QKY5_r993dx2D"
   .. "-t_dv83dzyz81Hn3f5_2e0eLCdQ5-tDfv9bROb-9IPd_78v4v8_l_rk2_eT1n_tevr7D_-ft8__XW_9_fff_9Pn_-uB"
   .. "-_3_vf_EFUwCTDQqIA-wJCQg0DCKBACoKwgIoFAQAAJA0QEAJgwKdgYALrCRACAFAAMEAIAAQZAAgAAAgAQiACQAoEA"
   .. "AEAgUAAYAEAwEABAwAAgAsBAIAAQHQMUwIIFAsIEjMioUwIQoEggJbKhBICgQVwhCLPAIgERMFAAgAAAVgACAsFgcSS"
   .. "AlQkECUG0AABAAgFEIFQgk9MAAwJmy1B4MG0ZWmAYPmCRDTAMgCIIyEAAAA.f_wACHwAAAAA"
 
-local complex_string =
-  "CQa0zsAQa0zsAAHABBENCEFsAP_gAEPgACQgKhwLIAFAAWAA0ACoAFwAOAAgABaADIAGgARQAmABQAC2AGEANoAgIBBg"
+local complex_string = "CQa0zsAQa0zsAAHABBENCEFsAP_gAEPgACQgKhwLIAFAAWAA0ACoAFwAOAAgABaADIAGgARQAmABQAC2AGEANoAgIBBg"
   .. "EIAI4AVoA5AB3ADxAH6AScApoBnADTgG8AToAn8BTYC4QF5gMZAbmA44ByYEJAIzASNAkyBSUClYFQw.fXgAAGgAAAAA"
   .. ".IKhwLIAFAAWAA0ACoAFwAOAAgABaADIAGgARQAmABQAC2AGEANoAgIBBgEIAI4AVoA5AB3ADxAH6AScApoBnADTgG8A"
   .. "ToAn8BTYC4QF5gMZAbmA44ByYEJAIzASNAkyBSUClYFQw"
 
-print(string.format("%-30s | %14s | %12s", "Benchmark", "Throughput", "Latency"))
+print(
+  string.format("%-30s | %14s | %12s", "Benchmark", "Throughput", "Latency")
+)
 print(string.rep("-", 65))
 
 -- 1. Parser Benchmarks
