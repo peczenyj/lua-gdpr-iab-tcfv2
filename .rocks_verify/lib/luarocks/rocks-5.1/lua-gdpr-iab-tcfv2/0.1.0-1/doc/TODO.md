@@ -58,11 +58,10 @@ A zero-dependency, JIT-optimized Lua parser for IAB TCF v2.x.
 - [x] Implement `bench/` suite (Throughput, Latency, Memory churn).
 - [x] JIT profiling in LuaJIT and optimization hot-fixes.
 - [x] **Cross-platform verification**: Add macOS to CI matrix.
-- [x] **Fuzz Data Optimization**: Extract minimal vendor data for global randomized sampling.
-- [x] **LuaRocks Automation**: Configure CI to automatically publish to LuaRocks on version tagging.
+- [ ] **Fuzz Data Optimization**: Support keeping only a logical subset of `to_json` data (e.g., under a `tests.fuzz` key).
+
 
 ### Phase 7: Advanced Optimizations
-
 - [ ] **Strict Linkage**: Ensure `strict_legal_basis` in Validator triggers `strict` mode in Parser.
 - [ ] **Vendor Prefetch**: Use `targetVendors` optimization automatically in Validator to pre-fetch the required `vendor_id`.
 

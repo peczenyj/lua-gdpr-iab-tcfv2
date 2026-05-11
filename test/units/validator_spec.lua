@@ -1,0 +1,167 @@
+local Validator = require("gdpr.iab.tcfv2.validator")
+
+describe("Validator", function()
+  local tc_string = "CP188cAQKFpAAAHABBENBSFsAP_gAEPgAAiQKqNX_H__bW9r8X73aft0eY1P9_j77uQxBhfJE-4"
+    .. "FzLvW_JwXx2ExNA36tqIKmRIEu3bBIQNlHJHUTVigaogVryHMak2cpTNKJ6BkiFMRM2dYCF5vm4tj-QKY5_r993dx2D"
+    .. "-t_dv83dzyz81Hn3f5_2e0eLCdQ5-tDfv9bROb-9IPd_78v4v8_l_rk2_eT1n_tevr7D_-ft8__XW_9_fff_9Pn_-uB"
+    .. "-_3_vf_EFUwCTDQqIA-wJCQg0DCKBACoKwgIoFAQAAJA0QEAJgwKdgYALrCRACAFAAMEAIAAQZAAgAAAgAQiACQAoEA"
+    .. "AEAgUAAYAEAwEABAwAAgAsBAIAAQHQMUwIIFAsIEjMioUwIQoEggJbKhBICgQVwhCLPAIgERMFAAgAAAVgACAsFgcSS"
+    .. "AlQkECXUG0AABAAgFEIFQgk9MAAwJmy1B4MG0ZWmAYPmCRDTAMgCIIyEAAAA.f_wACHwAAAAA"
+
+  -- String with Publisher Restrictions (Purpose 9 restricted for many vendors)
+  local restricted_string = "CP_1wcAQO4KMAAHABBENBiFsAP_gAEPAAAAAK8tX_H__bW9r8X736ft0eY1f9_j77uQxBhfJk-4"
+    .. "FzLvW_JwX32E7NA36tqYKmRIEu3bBIQNlHJHUTVigaogVryHMak2cpTtKJ6BkiFMRe2dYCF5vm4tj-QKY5_r993d52R"
+    .. "-9_dv83dzyz81nv3f9_-e1eLCdQ5-tDfv9bROb-9IP9_78v4v8_t_rk2_eT1n_tevr7D_-ft___X3_9_fff_9Pn__ul"
+    .. "-_X__f_n37v942CTIBJhoVEAXYEhAQKBhFAgBEFYQEUCgAAAAgYICAAgYFOQMAF1gAgAACgAECAEAAIMAAQAAAQAIRAB"
+    .. "IAUCAAAAQCAAAAAAQCAAgYAAQAWAgEAAIBoGKIEAAgSECRARAKYEAECQQEtlAgkBQIKYQBBlgAACImAAAAAAAKwAAAWC"
+    .. "gGAJASsSCBJCDaAAAgAQCiECoQSeGAMQgAwABBXklABgACCvI6ADAAEFeSkAGAAIK8hIAMAAQV5LQAYAAgryAA.f_wAC"
+    .. "HwAAAAA"
+
+  -- String with Disclosed Vendors segment (Segment Type 1)
+  local disclosed_string = "CQa0q5gQa0q5gAcABBESCEFsAP_gAEPgAChQLutR_G__bWlr-bb3aftkeYxP9_hr7sQxBgbJk24"
+    .. "FzLvW7JwXx2E5NAzatqIKmRIAu3TBIQNlHJHURVCgKIgVryDMaEyUoTNKJ6BkiFMRI2NYCF5vm4tjWQCY5vr99lc1mB"
+    .. "-N7dr82dzyy6hHn3a5_2S1WJCdIYetDfv8ZBKT-9IEd_x8v4v4_F7pE2-eS1n_pGvp6j9-YnM_dBmxt-bSffzPn__rl"
+    .. "_e7X_vd_n37v94XH77v____f_-7___2YLvAAmGhUQRlkQIBAoGEECABQVhABQIAgAASBogIATBgU5AwAXWEyAEAKAAYI"
+    .. "AQAAgwABAAAJAAhEAFABAIAAIBAoAAwAIAgIAGBgADABYiAQAAgOgYpgQQCBYAJGZVBpgSgAJBAS2VCCQDAgrhCEWeAQ"
+    .. "QIiYKAAAEAAoAAAB4LAQkkBKxIIAuIJoAACAAAKIECBFIWYAgqDNFoLwJOoyNMAwfMEySnQZAEwRkZJsQm_CYeKQohQQ"
+    .. "5AbFLMAdMAA.f_wACHwAAAAA.ILvNR_G__bXlv-bb36ftkeYxf9_hr7sQxBgbJs24FzLvW7JwX32E7NEzatqYKmRIEu3"
+    .. "bBIQNtHJjURVChKIgVrzDsaEyUoTtKJ-BkiHMRY2NYCFxvm4tjWQCZ5vr_91d9mT-N7dr-2dzyy7hnv3a9_-S1WJidKY"
+    .. "etHfv8ZBKT-_IU9_x-_4v4_N7pE2-eS1v_tGvt639-4vP_dpvxt-7yffz____73_e7X__d_______Xf_7__________"
+    .. "___cAA"
+
+  it("validates vendor consent correctly", function()
+    local v = Validator.new({
+      vendor_id = 284,
+      consent_purpose_ids = { 1 },
+    })
+    local ok, err = v:validate(tc_string)
+    assert.is_true(ok)
+    assert.is_nil(err)
+  end)
+
+  it("fails when vendor has no consent", function()
+    local v = Validator.new({
+      vendor_id = 3, -- Vendor 3 has no consent in this string
+      consent_purpose_ids = { 1 },
+    })
+    local ok, err = v:validate(tc_string)
+    assert.is_false(ok)
+    assert.are.equal("missing consent for vendor 3", err)
+  end)
+
+  it("fails when purpose has no consent", function()
+    local v = Validator.new({
+      vendor_id = 284,
+      consent_purpose_ids = { 24 }, -- Purpose 24 has no consent
+    })
+    local ok, err = v:validate(tc_string)
+    assert.is_false(ok)
+    assert.are.equal("missing consent for purpose 24", err)
+  end)
+
+  it("respects runtime overrides", function()
+    local v = Validator.new({
+      vendor_id = 284,
+    })
+    -- Override vendor_id to one that doesn't have consent
+    local ok, err =
+      v:validate(tc_string, { vendor_id = 3, consent_purpose_ids = { 1 } })
+    assert.is_false(ok)
+    assert.are.equal("missing consent for vendor 3", err)
+  end)
+
+  it("validates legitimate interest", function()
+    local v = Validator.new({
+      vendor_id = 284,
+      legitimate_interest_purpose_ids = { 2 },
+    })
+    local ok = v:validate(tc_string)
+    assert.is_true(ok)
+  end)
+
+  it("fails legitimate interest for purpose 1", function()
+    local v = Validator.new({
+      vendor_id = 284,
+      legitimate_interest_purpose_ids = { 1 },
+    })
+    local ok, err = v:validate(tc_string)
+    assert.is_false(ok)
+    assert.are.equal("purpose 1 does not allow legitimate interest", err)
+  end)
+
+  it("enforces min_tcf_policy_version", function()
+    local v = Validator.new({
+      vendor_id = 284,
+      min_tcf_policy_version = 10,
+    })
+    local ok, err = v:validate(tc_string)
+    assert.is_false(ok)
+    assert.match("policy version %d+ is less than required 10", err)
+  end)
+
+  describe("Flexible Purposes", function()
+    it(
+      "switches to Legitimate Interest when Consent is restricted (Type 2)",
+      function()
+        -- In restricted_string, Purpose 9 has a Type 2 restriction (Require LI) for many vendors.
+        -- We'll check vendor 284, purpose 9.
+        local v = Validator.new({
+          vendor_id = 284,
+          consent_purpose_ids = { 9 },
+          flexible_purpose_ids = { 9 },
+        })
+        local ok, err = v:validate(restricted_string)
+        -- It should pass because 284 has LI for Purpose 9 and it is flexible.
+        assert.is_true(ok, err)
+      end
+    )
+
+    it("fails when flexible purpose cannot establish either basis", function()
+      local v = Validator.new({
+        vendor_id = 99999, -- Non-existent vendor
+        consent_purpose_ids = { 1 },
+        flexible_purpose_ids = { 1 },
+      })
+      local ok, err = v:validate(tc_string)
+      assert.is_false(ok)
+      assert.match("missing consent for vendor 99999", err)
+    end)
+  end)
+
+  describe("Disclosed Vendors", function()
+    it("verifies presence in disclosed vendors segment", function()
+      local v = Validator.new({
+        vendor_id = 284,
+        verify_disclosed_vendors = true,
+      })
+      local ok, err = v:validate(disclosed_string)
+      assert.is_true(ok, err)
+    end)
+
+    it("fails when vendor is missing from disclosed vendors segment", function()
+      local v = Validator.new({
+        vendor_id = 12345, -- Not in the segment
+        verify_disclosed_vendors = true,
+      })
+      local ok, err = v:validate(disclosed_string)
+      assert.is_false(ok)
+      assert.are.equal("vendor 12345 not in disclosed vendors segment", err)
+    end)
+
+    it("enforces mandatory disclosed segment in TCF v2.3+", function()
+      local v = Validator.new({
+        vendor_id = 284,
+        verify_disclosed_vendors = true,
+        min_tcf_policy_version = 5,
+      })
+      -- tc_string has NO disclosed segment (it is version 2, policy 2 in some fields)
+      -- but we force min_policy 5.
+      local ok, err = v:validate(tc_string)
+      assert.is_false(ok)
+      assert.are.equal(
+        "missing mandatory disclosed vendors segment for policy v2.3+",
+        err
+      )
+    end)
+  end)
+end)
