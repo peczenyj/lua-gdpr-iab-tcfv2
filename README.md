@@ -1,14 +1,14 @@
 # lua-gdpr-iab-tcfv2
 
-[![Build](https://img.shields.io/github/actions/workflow/status/peczenyj/lua-gdpr-iab-tcfv2/linux.yml?branch=devel&label=build&logo=Lua)](https://github.com/peczenyj/lua-gdpr-iab-tcfv2/actions)
-[![Luacheck](https://img.shields.io/github/actions/workflow/status/peczenyj/lua-gdpr-iab-tcfv2/luacheck.yml?label=Luacheck&logo=Lua)](https://github.com/peczenyj/lua-gdpr-iab-tcfv2/actions?workflow=Luacheck)
+[![Build](https://img.shields.io/github/actions/workflow/status/peczenyj/lua-gdpr-iab-tcfv2/ci.yml?branch=devel&label=build&logo=Lua)](https://github.com/peczenyj/lua-gdpr-iab-tcfv2/actions)
+[![Luacheck](https://github.com/peczenyj/lua-gdpr-iab-tcfv2/workflows/Luacheck/badge.svg?label=Luacheck&logo=Lua)](https://github.com/peczenyj/lua-gdpr-iab-tcfv2/actions?workflow=Luacheck)
 [![License](https://img.shields.io/github/license/peczenyj/lua-gdpr-iab-tcfv2)](LICENSE)
 [![Coverage Status](https://coveralls.io/repos/github/peczenyj/lua-gdpr-iab-tcfv2/badge.svg)](https://coveralls.io/github/peczenyj/lua-gdpr-iab-tcfv2)
 
 A high-performance, zero-dependency, version-agnostic Lua parser and validator for IAB TCF v2.x consent strings.
 
 ## Features
-- **Agnostic**: Compatible with Lua 5.1, 5.2, 5.3, 5.4, and LuaJIT.
+- **Agnostic**: Compatible with Lua 5.1, 5.2, 5.3, 5.4, 5.5, and LuaJIT.
 - **Middleware-ready**: Optimized for OpenResty, HAProxy, and high-concurrency environments.
 - **Lazy Decoding**: Fields are decoded on-demand and cached for maximum efficiency.
 - **Zero-dependency**: No external libraries required; easy to embed.
@@ -99,6 +99,37 @@ core.register_action("tcf_validate", { "http-req" }, function(txn)
     txn.set_var(txn, "txn.tcf_denied", true)
 end)
 ```
+
+## Performance
+
+The following benchmarks were conducted on **LuaJIT 2.1** on a standard Linux environment. They demonstrate the library's efficiency in high-throughput middleware scenarios.
+
+### Parsing Performance
+Measures the time to initialize a new TCF object from a raw string.
+
+| Case | Throughput | Latency | Note |
+| :--- | :--- | :--- | :--- |
+| **Simple Parse** | ~30,000 ops/s | ~33 µs/op | Standard Core segment. |
+| **Complex Parse** | ~23,000 ops/s | ~42 µs/op | Multi-segment string. |
+| **Full Corpus Scan** | **~5,700 ops/s** | **~174 µs/op** | 1,024 unique real-world strings. |
+
+### Data Access & Transformation
+Measures the overhead of accessing lazy fields and full object dumps.
+
+| Case | Throughput | Latency | Note |
+| :--- | :--- | :--- | :--- |
+| **Field Access** | **~40,000,000 ops/s** | **~0.02 µs/op** | O(1) metatable lookup. |
+| **To Table** | ~750,000 ops/s | ~1.3 µs/op | Deep copy to plain Lua table. |
+
+### Validation Logic
+Measures the time to verify compliance using the `Validator` engine.
+
+| Case | Throughput | Latency | Note |
+| :--- | :--- | :--- | :--- |
+| **Standard Validation** | ~1,200 ops/s | ~800 µs/op | Default parsing + logic. |
+| **Optimized Validation** | **~1,000,000 ops/s** | **~0.95 µs/op** | **Pre-fetched vendor IDs.** |
+
+**Note**: Using the `targetVendors` optimization in the parser makes the subsequent validation **over 800x faster**, making it the recommended pattern for high-traffic middleware.
 
 ## Development
 
