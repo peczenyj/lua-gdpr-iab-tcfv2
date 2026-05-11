@@ -30,7 +30,7 @@ This installs `busted`, `luacheck`, and `luacov` locally. The `Makefile` automat
 The project uses three distinct classes of tests:
 
 1.  **Unit Tests (`make test`)**: Fast, deterministic tests for individual modules (plumbing, core logic). These are the primary target for code coverage.
-2.  **Reference Tests (`make test-reference`)**: Full scan of the 1024-line Golden Corpus to ensure 100% logical parity with the Perl reference implementation.
+2.  **Reference Tests (`make test-reference`)**: Full scan of the 1,024-line Golden Corpus to verify validator-decision parity with the Perl reference implementation across the configured scenarios.
 3.  **Fuzz Tests (`make test-fuzz`)**: Randomized sampling of the corpus and robustness testing with random bitstreams to catch crashes.
 
 ## Environment Variables
@@ -59,6 +59,7 @@ The test suite behavior can be customized using the following environment variab
 - `make bench`: Run the local benchmark suite (`bench/runner.lua`).
 - `make changelog`: Regenerate `CHANGELOG.md` from git history via `git-cliff`.
 - `make dist`: Package the source tarball for release.
+- `make pack`: Package the LuaRocks source rock (`.src.rock`) for offline installs.
 - `make install`: Install the library to the system Lua path (consider `luarocks install` instead).
 - `make clean`: Remove build artifacts and the local `.rocks/` tree.
 - `make ci`: Full CI orchestration (`check-format` → `lint` → `test` → `test-reference` → `test-fuzz`). **Must pass locally before any commit or push.**

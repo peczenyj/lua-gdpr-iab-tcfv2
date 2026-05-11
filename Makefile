@@ -42,7 +42,7 @@ else
   BUSTED_FLAGS =
 endif
 
-.PHONY: all test test-reference test-fuzz lint format check-format coverage report-coverage bench changelog dist install clean setup ci task
+.PHONY: all test test-reference test-fuzz lint format check-format coverage report-coverage bench changelog dist pack install clean setup ci task
 
 all: test
 
@@ -109,6 +109,14 @@ dist:
 	@rm -rf $(DIST_NAME)-$(VERSION)
 	@echo "Created $(DIST_NAME)-$(VERSION).tar.gz"
 
+# Produce the LuaRocks source rock (.src.rock) for offline installs.
+# `luarocks upload` builds its own internally when publishing to
+# luarocks.org; this target exists so we can also attach it to the
+# GitHub Release as an installable asset.
+pack:
+	@$(LUAROCKS) pack $(DIST_NAME)-$(VERSION)-1.rockspec
+	@echo "Created $(DIST_NAME)-$(VERSION)-1.src.rock"
+
 install:
 	@echo "Installing to standard Lua path..."
 	@mkdir -p /usr/local/share/lua/$(LUA_VERSION)/gdpr/iab/tcfv2
@@ -116,4 +124,4 @@ install:
 	@echo "Done."
 
 clean:
-	rm -rf *.tar.gz luacov.*.out luacov.report.out $(ROCKS_PATH)
+	rm -rf *.tar.gz *.src.rock *.rock luacov.*.out luacov.report.out $(ROCKS_PATH)

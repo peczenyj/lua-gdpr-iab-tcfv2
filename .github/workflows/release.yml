@@ -1,0 +1,47 @@
+name: Release
+
+on:
+  push:
+    tags: [ "v*" ]
+
+# Needed so softprops/action-gh-release@v2 can attach assets to the
+# auto-created release for this tag.
+permissions:
+  contents: write
+
+jobs:
+  # Reuse the full ci.yml matrix as the release gate. If any cell
+  # fails, `publish` is skipped. `secrets: inherit` lets the called
+  # workflow see COVERALLS_REPO_TOKEN (and anything else CI consumes).
+  test:
+    uses: ./.github/workflows/ci.yml
+    secrets: inherit
+
+  publish:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Lua
+        uses: hishamhm/gh-actions-lua@master
+        with:
+          luaVersion: "5.4"
+      - name: Setup LuaRocks
+        uses: hishamhm/gh-actions-luarocks@master
+        with:
+          luaRocksVersion: "3.13.0"
+      - name: Build dist artifacts
+        run: |
+          make dist
+          make pack
+      - name: Upload GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            lua-gdpr-iab-tcfv2-*.tar.gz
+            lua-gdpr-iab-tcfv2-*.src.rock
+            *.rockspec
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Publish to LuaRocks
+        run: luarocks upload *.rockspec --api-key=${{ secrets.LUAROCKS_APIKEY }}
