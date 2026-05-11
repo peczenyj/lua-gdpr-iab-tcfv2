@@ -21,6 +21,10 @@ Patches are welcome! Please follow these guidelines to ensure a smooth contribut
 
 This project enforces strict formatting (StyLua) and linting (Luacheck) via CI. PRs that do not pass `make ci` will not be merged.
 
+## Releasing
+
+Maintainers cutting a new version: see [RELEASING.md](RELEASING.md) for the full step-by-step procedure (release branch, version bump, changelog, tag, publish).
+
 ## License
 
 By contributing, you agree that your contributions will be licensed under the MIT License.
