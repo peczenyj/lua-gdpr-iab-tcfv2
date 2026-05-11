@@ -3,9 +3,11 @@ name: Continuous Integration
 on:
   push:
     branches: [ devel, main ]
-    tags: [ "v*" ]
   pull_request:
     branches: [ devel, main ]
+  # Tag pushes are handled by release.yml, which invokes this workflow
+  # via workflow_call as its test gate before publishing.
+  workflow_call:
 
 jobs:
   test-linux:
@@ -54,8 +56,11 @@ jobs:
         make test LUA_BIN=$LUA_EXEC
         make test-reference LUA_BIN=$LUA_EXEC
         make test-fuzz LUA_BIN=$LUA_EXEC
+    # Gate coverage upload to a single matrix entry. Previously every
+    # Linux cell ran make coverage + uploaded to Coveralls, producing 7
+    # duplicate uploads per CI run. Lua 5.4 is the canonical row.
     - name: Report Coverage
-      if: success()
+      if: success() && matrix.luaVersion == '5.4'
       run: |
         make coverage
         make report-coverage
@@ -105,29 +110,3 @@ jobs:
         make test-reference LUA_BIN=$LUA_EXEC
         make test-fuzz LUA_BIN=$LUA_EXEC
 
-  release:
-    needs: [test-linux, test-macos]
-    if: startsWith(github.ref, 'refs/tags/v')
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v4
-    - name: Setup Lua
-      uses: hishamhm/gh-actions-lua@master
-      with:
-        luaVersion: "5.4"
-    - name: Setup LuaRocks
-      uses: hishamhm/gh-actions-luarocks@master
-      with:
-        luaRocksVersion: "3.13.0"
-    - name: Create Release Artifacts
-      run: make dist
-    - name: Upload GitHub Release
-      uses: softprops/action-gh-release@v2
-      with:
-        files: |
-          lua-gdpr-iab-tcfv2-*.tar.gz
-          *.rockspec
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    - name: Publish to LuaRocks
-      run: luarocks upload *.rockspec --api-key=${{ secrets.LUAROCKS_APIKEY }}

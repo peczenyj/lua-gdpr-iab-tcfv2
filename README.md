@@ -3,19 +3,32 @@
 [![Build](https://img.shields.io/github/actions/workflow/status/peczenyj/lua-gdpr-iab-tcfv2/ci.yml?branch=devel&label=build&logo=Lua)](https://github.com/peczenyj/lua-gdpr-iab-tcfv2/actions)
 [![Luacheck](https://github.com/peczenyj/lua-gdpr-iab-tcfv2/workflows/Luacheck/badge.svg?label=Luacheck&logo=Lua)](https://github.com/peczenyj/lua-gdpr-iab-tcfv2/actions?workflow=Luacheck)
 [![License](https://img.shields.io/github/license/peczenyj/lua-gdpr-iab-tcfv2)](LICENSE)
-[![Coverage Status](https://coveralls.io/repos/github/peczenyj/lua-gdpr-iab-tcfv2/badge.svg)](https://coveralls.io/github/peczenyj/lua-gdpr-iab-tcfv2)
+[![LuaRocks](https://img.shields.io/luarocks/v/peczenyj/lua-gdpr-iab-tcfv2?logo=lua&label=luarocks)](https://luarocks.org/modules/peczenyj/lua-gdpr-iab-tcfv2)
+[![Coverage Status](https://coveralls.io/repos/github/peczenyj/lua-gdpr-iab-tcfv2/badge.svg?branch=devel)](https://coveralls.io/github/peczenyj/lua-gdpr-iab-tcfv2?branch=devel)
+[![CodeQL](https://github.com/peczenyj/lua-gdpr-iab-tcfv2/actions/workflows/github-code-scanning/codeql/badge.svg)](https://github.com/peczenyj/lua-gdpr-iab-tcfv2/actions/workflows/github-code-scanning/codeql)
+[![Dependency Review](https://github.com/peczenyj/lua-gdpr-iab-tcfv2/actions/workflows/dependency-review.yml/badge.svg)](https://github.com/peczenyj/lua-gdpr-iab-tcfv2/actions/workflows/dependency-review.yml)
+[![Latest release](https://img.shields.io/github/release/peczenyj/lua-gdpr-iab-tcfv2.svg)](https://github.com/peczenyj/lua-gdpr-iab-tcfv2/releases/latest)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/peczenyj/lua-gdpr-iab-tcfv2/blob/main/CONTRIBUTING.md#pull-request-process)
+
 
 A high-performance, zero-dependency, version-agnostic Lua parser and validator for IAB TCF v2.x consent strings.
 
 ## Features
-- **Agnostic**: Compatible with Lua 5.1, 5.2, 5.3, 5.4, 5.5, and LuaJIT.
+- **Version-agnostic**: Compatible with Lua 5.1, 5.2, 5.3, 5.4, 5.5, and LuaJIT.
 - **Middleware-ready**: Optimized for OpenResty, HAProxy, and high-concurrency environments.
 - **Lazy Decoding**: Fields are decoded on-demand and cached for maximum efficiency.
 - **Zero-dependency**: No external libraries required; easy to embed.
-- **Parity-verified**: Tested against a comprehensive Golden Corpus for exact logical parity with existing industry-standard parsers.
+- **Parity-verified**: Field-level structural parity against the Perl reference implementation's serialized output across the rich tier of a 1,024-row Golden Corpus, plus validator-decision parity across all 1,024 rows.
 
 ## Installation
-Currently in development. You can clone the repository and include the `src` directory in your `LUA_PATH`.
+
+Via [LuaRocks](https://luarocks.org/modules/peczenyj/lua-gdpr-iab-tcfv2):
+
+```bash
+luarocks install lua-gdpr-iab-tcfv2
+```
+
+Or, for local development, clone the repository and add `src/` to your `LUA_PATH`:
 
 ```bash
 export LUA_PATH="./src/?.lua;;"

@@ -11,13 +11,13 @@ Optimized for high-performance middleware environments like **OpenResty** and **
    - `main`: **OFF LIMITS**. No direct commits or pushes. Only includes tagged releases via `gitflow release`.
    - `devel`: Main development branch. **NEVER** commit directly without explicit permission for very specific tasks. All feature branches (`feat/*`) must merge here.
    - **Feature Workflow**: Always create a branch, work, commit, push, create a Pull Request, and assign it to the project owner (@peczenyj).
-2. **Release Process**: Releases are made from `devel` to `main`. Tags (`v*`) trigger automated release artifacts (.tar.gz) and potentially Luarocks uploads.
+2. **Release Process**: Releases are made from `devel` to `main` via a `release/X.Y.Z` branch. Tags (`v*`) trigger automated release artifacts (.tar.gz, .src.rock) and LuaRocks upload. See [RELEASING.md](RELEASING.md) for the full procedure.
 3. **Commit Messages**: Follow Conventional Commits: `type(scope): short description`.
    - Types: `feat`, `fix`, `docs`, `style`, `refactor`, `test`, `chore`.
-4. **CI/CD**: GitHub Actions on Linux (Matrix: 5.1, 5.2, 5.3, 5.4, LuaJIT, OpenResty) must pass.
+4. **CI/CD**: GitHub Actions on Linux (Matrix: 5.1, 5.2, 5.3, 5.4, 5.5, LuaJIT, OpenResty) and macOS (5.4, LuaJIT) must pass.
 
 ## Technical Rules & Conventions
-1. **Lua Compatibility**: Compatible with Lua 5.1, 5.2, 5.3, 5.4, and LuaJIT.
+1. **Lua Compatibility**: Compatible with Lua 5.1, 5.2, 5.3, 5.4, 5.5, and LuaJIT.
    - **Package Structure**: Source files are in `src/gdpr/iab/tcfv2/` mapping to the `gdpr.iab.tcfv2` module.
    - **Zero-dependency**: No external libraries allowed in `src/`. Use internal bridges for bitwise and Base64.
 2. **Architecture**: **Lazy/On-demand decoding** with caching via metatables.

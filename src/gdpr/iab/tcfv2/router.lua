@@ -22,15 +22,26 @@ local DECODERS = {
 -- @function decode_segments
 -- @param segments table List of Base64url encoded segments.
 -- @param[opt] options table Configuration options.
+-- @param[opt] warnings table Aggregate to append lenient-mode failures to.
+--   Typically the parser's unified `core.warnings` table.
 -- @return table|nil Map of segment type to segment object, or nil on error.
 -- @return string|nil Error message if decoding failed.
-function Router.decode_segments(segments, options)
+function Router.decode_segments(segments, options, warnings)
+  options = options or {}
+  warnings = warnings or {}
   local results = {}
+
   -- Skip the first segment (Core)
   for i = 2, #segments do
     local b64 = segments[i]
     local data, err = base64.decode_url(b64)
-    if data then
+    if not data then
+      local msg = "invalid base64 in segment " .. i .. ": " .. tostring(err)
+      if options.strict then
+        return nil, msg
+      end
+      table.insert(warnings, msg)
+    else
       local bs = BitStream.new(data)
       local segment_type = bs:peek_int(3)
       if segment_type and DECODERS[segment_type] then
@@ -38,15 +49,26 @@ function Router.decode_segments(segments, options)
         local segment_obj, d_err = decoder.new(data, options)
         if segment_obj then
           results[segment_type] = segment_obj
-        elseif options.strict then
-          return nil,
-            "failed to decode segment " .. i .. ": " .. tostring(d_err)
+        else
+          local msg = "failed to decode segment "
+            .. i
+            .. ": "
+            .. tostring(d_err)
+          if options.strict then
+            return nil, msg
+          end
+          table.insert(warnings, msg)
         end
-      elseif options.strict then
-        return nil, "unknown segment type: " .. tostring(segment_type)
+      else
+        local msg = "unknown segment type at segment "
+          .. i
+          .. ": "
+          .. tostring(segment_type)
+        if options.strict then
+          return nil, msg
+        end
+        table.insert(warnings, msg)
       end
-    elseif options.strict then
-      return nil, "invalid base64 in segment " .. i .. ": " .. tostring(err)
     end
   end
   return results

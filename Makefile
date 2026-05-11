@@ -14,12 +14,15 @@ GIT_CLIFF    = git-cliff
 
 SRC_DIR      = src
 DIST_NAME    = lua-gdpr-iab-tcfv2
-VERSION      = 0.1.0
+VERSION      = 0.2.0
 
 # Test Directories
 TEST_UNITS     = test/units
 TEST_REFERENCE = test/reference
 TEST_FUZZ      = test/fuzz
+
+# Auxiliary source dirs included in lint/format
+BENCH_DIR    = bench
 
 # Local dependencies path
 ROCKS_PATH   = ./.rocks
@@ -39,7 +42,7 @@ else
   BUSTED_FLAGS =
 endif
 
-.PHONY: all test test-reference test-fuzz lint format check-format coverage report-coverage bench changelog dist install clean setup ci task
+.PHONY: all test test-reference test-fuzz lint format check-format coverage report-coverage bench changelog dist pack install clean setup ci task
 
 all: test
 
@@ -76,13 +79,13 @@ test-fuzz:
 	@$(ENV_SETUP) && $(BUSTED) $(BUSTED_FLAGS) $(TEST_FUZZ)
 
 lint:
-	@$(ENV_SETUP) && $(LUACHECK) $(SRC_DIR) $(TEST_UNITS) $(TEST_REFERENCE) $(TEST_FUZZ)
+	@$(ENV_SETUP) && $(LUACHECK) $(SRC_DIR) $(TEST_UNITS) $(TEST_REFERENCE) $(TEST_FUZZ) $(BENCH_DIR)
 
 format:
-	@$(STYLUA) $(SRC_DIR) $(TEST_UNITS) $(TEST_REFERENCE) $(TEST_FUZZ)
+	@$(STYLUA) $(SRC_DIR) $(TEST_UNITS) $(TEST_REFERENCE) $(TEST_FUZZ) $(BENCH_DIR)
 
 check-format:
-	@$(STYLUA) --check $(SRC_DIR) $(TEST_UNITS) $(TEST_REFERENCE) $(TEST_FUZZ)
+	@$(STYLUA) --check $(SRC_DIR) $(TEST_UNITS) $(TEST_REFERENCE) $(TEST_FUZZ) $(BENCH_DIR)
 
 coverage:
 	@$(ENV_SETUP) && $(BUSTED) $(BUSTED_FLAGS) --coverage $(TEST_UNITS)
@@ -106,6 +109,14 @@ dist:
 	@rm -rf $(DIST_NAME)-$(VERSION)
 	@echo "Created $(DIST_NAME)-$(VERSION).tar.gz"
 
+# Produce the LuaRocks source rock (.src.rock) for offline installs.
+# `luarocks upload` builds its own internally when publishing to
+# luarocks.org; this target exists so we can also attach it to the
+# GitHub Release as an installable asset.
+pack:
+	@$(LUAROCKS) pack $(DIST_NAME)-$(VERSION)-1.rockspec
+	@echo "Created $(DIST_NAME)-$(VERSION)-1.src.rock"
+
 install:
 	@echo "Installing to standard Lua path..."
 	@mkdir -p /usr/local/share/lua/$(LUA_VERSION)/gdpr/iab/tcfv2
@@ -113,4 +124,4 @@ install:
 	@echo "Done."
 
 clean:
-	rm -rf *.tar.gz luacov.*.out luacov.report.out $(ROCKS_PATH)
+	rm -rf *.tar.gz *.src.rock *.rock luacov.*.out luacov.report.out $(ROCKS_PATH)
