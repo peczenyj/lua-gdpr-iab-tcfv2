@@ -14,7 +14,7 @@ GIT_CLIFF    = git-cliff
 
 SRC_DIR      = src
 DIST_NAME    = lua-gdpr-iab-tcfv2
-VERSION      = 0.1.0
+VERSION      = 0.2.0
 
 # Test Directories
 TEST_UNITS     = test/units

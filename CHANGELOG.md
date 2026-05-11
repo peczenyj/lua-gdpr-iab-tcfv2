@@ -1,3 +1,20 @@
+## [0.2.0] - 2026-05-11
+
+### Bug Fixes
+
+- *(validator)* Port Perl-aligned behavior (Tier A) 
+- *(robustness)* Nil-safe predicates, no override mutation, router warnings 
+
+### Documentation
+
+- *(release)* Document release procedure in RELEASING.md 
+- *(readme)* Add LuaRocks badge and install instructions 
+- *(repo)* Align documentation and right-size parity claims 
+
+### Other
+
+- Regenerate golden file based on perl corpus 
+
 ## [0.1.0] - 2026-05-11
 
 ### Bug Fixes
@@ -44,27 +61,8 @@
 
 ### Other
 
-- Merge pull request #7 from peczenyj/docs/update-agent-interaction-rules
-
-docs: update agent interaction rules
-- Merge pull request #3 from peczenyj/feat/phase-2-core-segment
-
-feat(core): implement core segment and lazy infrastructure
-- Merge branch 'devel' into feat/phase-2-core-segment
-- Merge pull request #2 from peczenyj/feat/phase-1-plumbing
-
-feat(plumbing): implement core utilities and golden harness
-- Merge branch 'devel' into feat/phase-1-plumbing
-- Merge pull request #5 from peczenyj/feat/dependency-management
-
-feat(infra): add dependency management and setup documentation
-- Merge pull request #4 from peczenyj/docs/update-agent-rules
-
-docs: update operational rules in AGENTS.md
+- Update changelog
 - Add check for self type in bitstream:read_int
-- Merge pull request #1 from peczenyj/feat/phase-0-infrastructure
-
-feat(infra): setup Phase 0 infrastructure
 
 ### Performance
 
