@@ -31,6 +31,20 @@ function M.new(tc_string, options)
   end
 
   options = options or {}
+
+  -- In strict mode, a TC string with empty segments (leading/trailing dot
+  -- or consecutive dots) is malformed by structure. Lenient mode still
+  -- accepts and silently drops empties via the gmatch in split().
+  if options.strict then
+    if
+      tc_string:find("%.%.")
+      or tc_string:sub(1, 1) == "."
+      or tc_string:sub(-1) == "."
+    then
+      return nil, "malformed tc string: empty segment"
+    end
+  end
+
   local segments = split(tc_string, "%.")
 
   -- Decode Core segment
@@ -54,8 +68,10 @@ function M.new(tc_string, options)
     end
   end
 
-  -- Route other segments
-  local other_segments, r_err = Router.decode_segments(segments, options)
+  -- Route other segments. Pass core.warnings so the router can append
+  -- lenient-mode segment failures to the unified parser.warnings aggregate.
+  local other_segments, r_err =
+    Router.decode_segments(segments, options, core.warnings)
   if not other_segments then
     return nil, r_err
   end
@@ -106,12 +122,16 @@ function M.new(tc_string, options)
         return val
       end
 
+      -- Predicates derived from policyVersion. In lenient mode policyVersion
+      -- can be nil if the core segment is truncated; treat that as "not >=".
       if key == "is_v22_plus" then
-        return tbl._core.policyVersion >= 4
+        local pv = tbl._core.policyVersion
+        return pv ~= nil and pv >= 4
       end
 
       if key == "is_v23" then
-        return tbl._core.policyVersion >= 5
+        local pv = tbl._core.policyVersion
+        return pv ~= nil and pv >= 5
       end
 
       return nil
