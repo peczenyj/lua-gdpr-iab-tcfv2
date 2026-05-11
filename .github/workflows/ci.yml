@@ -95,10 +95,20 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     
+    - name: Setup Lua
+      uses: hishamhm/gh-actions-lua@master
+      with:
+        luaVersion: "5.4"
+
+    - name: Setup LuaRocks
+      uses: hishamhm/gh-actions-luarocks@master
+      with:
+        luaRocksVersion: "3.13.0"
+
     - name: Create Release Artifacts
       run: make dist
       
-    - name: Upload Release Artifacts
+    - name: Upload GitHub Release
       uses: softprops/action-gh-release@v2
       with:
         files: |
@@ -106,3 +116,7 @@ jobs:
           *.rockspec
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Publish to LuaRocks
+      run: |
+        luarocks upload *.rockspec --api-key=${{ secrets.LUAROCKS_APIKEY }}

@@ -1,0 +1,109 @@
+commands = {}
+dependencies = {
+   ["lua-gdpr-iab-tcfv2"] = {
+      ["0.1.0-1"] = {
+         {
+            constraints = {
+               {
+                  op = ">=",
+                  version = {
+                     5, 1, string = "5.1"
+                  }
+               }
+            },
+            name = "lua"
+         }
+      }
+   }
+}
+modules = {
+   ["gdpr.iab.tcfv2.allowed_vendors"] = {
+      "lua-gdpr-iab-tcfv2/0.1.0-1"
+   },
+   ["gdpr.iab.tcfv2.base64"] = {
+      "lua-gdpr-iab-tcfv2/0.1.0-1"
+   },
+   ["gdpr.iab.tcfv2.bit"] = {
+      "lua-gdpr-iab-tcfv2/0.1.0-1"
+   },
+   ["gdpr.iab.tcfv2.bit_bit32"] = {
+      "lua-gdpr-iab-tcfv2/0.1.0-1"
+   },
+   ["gdpr.iab.tcfv2.bit_fallback"] = {
+      "lua-gdpr-iab-tcfv2/0.1.0-1"
+   },
+   ["gdpr.iab.tcfv2.bit_luajit"] = {
+      "lua-gdpr-iab-tcfv2/0.1.0-1"
+   },
+   ["gdpr.iab.tcfv2.bit_native"] = {
+      "lua-gdpr-iab-tcfv2/0.1.0-1"
+   },
+   ["gdpr.iab.tcfv2.bitstream"] = {
+      "lua-gdpr-iab-tcfv2/0.1.0-1"
+   },
+   ["gdpr.iab.tcfv2.common"] = {
+      "lua-gdpr-iab-tcfv2/0.1.0-1"
+   },
+   ["gdpr.iab.tcfv2.constants.purpose"] = {
+      "lua-gdpr-iab-tcfv2/0.1.0-1"
+   },
+   ["gdpr.iab.tcfv2.constants.restriction_type"] = {
+      "lua-gdpr-iab-tcfv2/0.1.0-1"
+   },
+   ["gdpr.iab.tcfv2.constants.special_feature"] = {
+      "lua-gdpr-iab-tcfv2/0.1.0-1"
+   },
+   ["gdpr.iab.tcfv2.core"] = {
+      "lua-gdpr-iab-tcfv2/0.1.0-1"
+   },
+   ["gdpr.iab.tcfv2.disclosed_vendors"] = {
+      "lua-gdpr-iab-tcfv2/0.1.0-1"
+   },
+   ["gdpr.iab.tcfv2.init"] = {
+      "lua-gdpr-iab-tcfv2/0.1.0-1"
+   },
+   ["gdpr.iab.tcfv2.parser"] = {
+      "lua-gdpr-iab-tcfv2/0.1.0-1"
+   },
+   ["gdpr.iab.tcfv2.publisher_tc"] = {
+      "lua-gdpr-iab-tcfv2/0.1.0-1"
+   },
+   ["gdpr.iab.tcfv2.router"] = {
+      "lua-gdpr-iab-tcfv2/0.1.0-1"
+   },
+   ["gdpr.iab.tcfv2.validator"] = {
+      "lua-gdpr-iab-tcfv2/0.1.0-1"
+   }
+}
+repository = {
+   ["lua-gdpr-iab-tcfv2"] = {
+      ["0.1.0-1"] = {
+         {
+            arch = "installed",
+            commands = {},
+            dependencies = {},
+            modules = {
+               ["gdpr.iab.tcfv2.allowed_vendors"] = "gdpr/iab/tcfv2/allowed_vendors.lua",
+               ["gdpr.iab.tcfv2.base64"] = "gdpr/iab/tcfv2/base64.lua",
+               ["gdpr.iab.tcfv2.bit"] = "gdpr/iab/tcfv2/bit.lua",
+               ["gdpr.iab.tcfv2.bit_bit32"] = "gdpr/iab/tcfv2/bit_bit32.lua",
+               ["gdpr.iab.tcfv2.bit_fallback"] = "gdpr/iab/tcfv2/bit_fallback.lua",
+               ["gdpr.iab.tcfv2.bit_luajit"] = "gdpr/iab/tcfv2/bit_luajit.lua",
+               ["gdpr.iab.tcfv2.bit_native"] = "gdpr/iab/tcfv2/bit_native.lua",
+               ["gdpr.iab.tcfv2.bitstream"] = "gdpr/iab/tcfv2/bitstream.lua",
+               ["gdpr.iab.tcfv2.common"] = "gdpr/iab/tcfv2/common.lua",
+               ["gdpr.iab.tcfv2.constants.purpose"] = "gdpr/iab/tcfv2/constants/purpose.lua",
+               ["gdpr.iab.tcfv2.constants.restriction_type"] = "gdpr/iab/tcfv2/constants/restriction_type.lua",
+               ["gdpr.iab.tcfv2.constants.special_feature"] = "gdpr/iab/tcfv2/constants/special_feature.lua",
+               ["gdpr.iab.tcfv2.core"] = "gdpr/iab/tcfv2/core.lua",
+               ["gdpr.iab.tcfv2.disclosed_vendors"] = "gdpr/iab/tcfv2/disclosed_vendors.lua",
+               ["gdpr.iab.tcfv2.init"] = "gdpr/iab/tcfv2/init.lua",
+               ["gdpr.iab.tcfv2.parser"] = "gdpr/iab/tcfv2/parser.lua",
+               ["gdpr.iab.tcfv2.publisher_tc"] = "gdpr/iab/tcfv2/publisher_tc.lua",
+               ["gdpr.iab.tcfv2.router"] = "gdpr/iab/tcfv2/router.lua",
+               ["gdpr.iab.tcfv2.validator"] = "gdpr/iab/tcfv2/validator.lua"
+            }
+         }
+      }
+   }
+}
