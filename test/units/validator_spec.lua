@@ -46,7 +46,7 @@ describe("Validator", function()
     })
     local ok, err = v:validate(tc_string)
     assert.is_false(ok)
-    assert.are.equal("missing consent for vendor 3", err)
+    assert.are.equal("vendor 3 not allowed for purpose 1 (consent)", err)
   end)
 
   it("fails when purpose has no consent", function()
@@ -56,7 +56,7 @@ describe("Validator", function()
     })
     local ok, err = v:validate(tc_string)
     assert.is_false(ok)
-    assert.are.equal("missing consent for purpose 24", err)
+    assert.are.equal("vendor 284 not allowed for purpose 24 (consent)", err)
   end)
 
   it("respects runtime overrides", function()
@@ -67,7 +67,7 @@ describe("Validator", function()
     local ok, err =
       v:validate(tc_string, { vendor_id = 3, consent_purpose_ids = { 1 } })
     assert.is_false(ok)
-    assert.are.equal("missing consent for vendor 3", err)
+    assert.are.equal("vendor 3 not allowed for purpose 1 (consent)", err)
   end)
 
   it("validates legitimate interest", function()
@@ -86,7 +86,24 @@ describe("Validator", function()
     })
     local ok, err = v:validate(tc_string)
     assert.is_false(ok)
-    assert.are.equal("purpose 1 does not allow legitimate interest", err)
+    assert.are.equal("legitimate interest not permitted for purpose 1", err)
+  end)
+
+  it("enforces LI carve-out for purposes 3-6 in TCF v2.2+", function()
+    -- tc_string is policy version 5 (TCF v2.3), so the carve-out fires for
+    -- pids 3-6. Matches Perl's _li_carve_out_applies.
+    for _, pid in ipairs({ 3, 4, 5, 6 }) do
+      local v = Validator.new({
+        vendor_id = 284,
+        legitimate_interest_purpose_ids = { pid },
+      })
+      local ok, err = v:validate(tc_string)
+      assert.is_false(ok, "expected failure for LI on purpose " .. pid)
+      assert.are.equal(
+        string.format("legitimate interest not permitted for purpose %d", pid),
+        err
+      )
+    end
   end)
 
   it("enforces min_tcf_policy_version", function()
@@ -96,7 +113,10 @@ describe("Validator", function()
     })
     local ok, err = v:validate(tc_string)
     assert.is_false(ok)
-    assert.match("policy version %d+ is less than required 10", err)
+    assert.match(
+      "TC string policy version %d+ is below required minimum 10",
+      err
+    )
   end)
 
   describe("Flexible Purposes", function()
@@ -124,7 +144,74 @@ describe("Validator", function()
       })
       local ok, err = v:validate(tc_string)
       assert.is_false(ok)
-      assert.match("missing consent for vendor 99999", err)
+      assert.match("vendor 99999 not allowed for purpose 1 %(consent%)", err)
+    end)
+  end)
+
+  describe("Constructor coherence", function()
+    it("errors when a purpose is in both consent and LI lists", function()
+      assert.has_error(
+        function()
+          Validator.new({
+            vendor_id = 284,
+            consent_purpose_ids = { 1, 2 },
+            legitimate_interest_purpose_ids = { 2, 7 },
+          })
+        end,
+        "purpose 2 cannot be in both consent_purpose_ids and legitimate_interest_purpose_ids"
+      )
+    end)
+
+    it("errors when a flexible purpose is in neither basis list", function()
+      assert.has_error(
+        function()
+          Validator.new({
+            vendor_id = 284,
+            consent_purpose_ids = { 1 },
+            flexible_purpose_ids = { 9 }, -- 9 isn't in consent or LI
+          })
+        end,
+        "flexible purpose 9 must also appear in consent_purpose_ids or legitimate_interest_purpose_ids"
+      )
+    end)
+  end)
+
+  describe("validate_all accumulates failures", function()
+    it("returns every failure from the consent loop", function()
+      local v = Validator.new({
+        vendor_id = 99999, -- guaranteed miss across the corpus
+        consent_purpose_ids = { 1, 2, 3 },
+      })
+      local ok, errs = v:validate_all(tc_string)
+      assert.is_false(ok)
+      assert.are.equal("table", type(errs))
+      assert.are.equal(3, #errs)
+    end)
+  end)
+
+  describe("strict_legal_basis decoupled from parser strict", function()
+    it(
+      "errors on out-of-range purpose id when strict_legal_basis is true",
+      function()
+        local v = Validator.new({
+          vendor_id = 284,
+          consent_purpose_ids = { 25 }, -- 25 is outside the TCF 1..24 range
+          strict_legal_basis = true,
+        })
+        assert.has_error(function()
+          v:validate(tc_string)
+        end)
+      end
+    )
+
+    it("returns false silently on out-of-range pid by default", function()
+      local v = Validator.new({
+        vendor_id = 284,
+        consent_purpose_ids = { 25 },
+      })
+      local ok, err = v:validate(tc_string)
+      assert.is_false(ok)
+      assert.match("vendor 284 not allowed for purpose 25 %(consent%)", err)
     end)
   end)
 
@@ -145,7 +232,7 @@ describe("Validator", function()
       })
       local ok, err = v:validate(disclosed_string)
       assert.is_false(ok)
-      assert.are.equal("vendor 12345 not in disclosed vendors segment", err)
+      assert.are.equal("vendor 12345 not disclosed", err)
     end)
 
     it("enforces mandatory disclosed segment in TCF v2.3+", function()
@@ -161,10 +248,7 @@ describe("Validator", function()
       -- silently tolerated. This test verifies that gating.
       local ok, err = v:validate(tc_string)
       assert.is_false(ok)
-      assert.are.equal(
-        "missing mandatory disclosed vendors segment for policy v2.3+",
-        err
-      )
+      assert.are.equal("missing disclosed vendors segment", err)
     end)
   end)
 end)
