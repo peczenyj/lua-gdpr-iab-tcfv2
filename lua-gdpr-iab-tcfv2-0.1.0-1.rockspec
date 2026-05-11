@@ -13,8 +13,8 @@ description = {
 
       It is specifically designed for high-throughput middleware environments such as
       OpenResty and HAProxy, featuring lazy decoding, zero external dependencies,
-      and validator-decision parity with the Perl reference implementation verified
-      across a 1,024-row Golden Corpus.
+      and field-level structural parity with the Perl reference implementation
+      verified against a 1,024-row Golden Corpus.
    ]],
    homepage = "https://github.com/peczenyj/lua-gdpr-iab-tcfv2",
    license = "MIT",
