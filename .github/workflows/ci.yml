@@ -1,4 +1,4 @@
-name: Linux Tests
+name: Continuous Integration
 
 on:
   push:
@@ -8,11 +8,13 @@ on:
 
 jobs:
   test:
-    runs-on: ubuntu-22.04
+    name: test (${{ matrix.os }}, ${{ matrix.luaVersion }})
+    runs-on: ${{ matrix.os }}
 
     strategy:
       fail-fast: false
       matrix:
+        os: [ubuntu-22.04, macos-latest]
         luaVersion: ["5.5", "5.4", "5.3", "5.2", "5.1", "luajit", "luajit-openresty"]
 
     steps:
@@ -30,11 +32,15 @@ jobs:
 
     - name: Install StyLua
       run: |
-        STYLUA_VERSION=v0.20.0
-        wget https://github.com/JohnnyMorganz/StyLua/releases/download/${STYLUA_VERSION}/stylua-linux-x86_64.zip
-        unzip stylua-linux-x86_64.zip
-        chmod +x stylua
-        sudo mv stylua /usr/local/bin/
+        if [[ "${{ runner.os }}" == "Linux" ]]; then
+          STYLUA_VERSION=v0.20.0
+          wget https://github.com/JohnnyMorganz/StyLua/releases/download/${STYLUA_VERSION}/stylua-linux-x86_64.zip
+          unzip stylua-linux-x86_64.zip
+          chmod +x stylua
+          sudo mv stylua /usr/local/bin/
+        else
+          brew install stylua
+        fi
 
     - name: Install Dev Dependencies
       run: |
@@ -69,9 +75,9 @@ jobs:
         make test-fuzz LUA_BIN=$LUA_EXEC
 
     - name: Report Coverage
-      if: success()
+      if: success() && matrix.os == 'ubuntu-22.04'
       run: |
-        # We run unit tests with coverage and report
+        # We run unit tests with coverage and report (Ubuntu only to avoid duplication)
         make coverage
         make report-coverage
       env:

@@ -54,11 +54,12 @@ A zero-dependency, JIT-optimized Lua parser for IAB TCF v2.x.
 - [x] Configure CI for Full Scan on stable/high-performance versions (5.5, LuaJIT).
 
 
-### Phase 6: Performance & Platform
-- [ ] Implement `bench/` suite (Throughput, Latency, Memory churn).
-- [ ] JIT profiling in LuaJIT and optimization hot-fixes.
-- [ ] **Cross-platform verification**: Add macOS and Windows to CI matrix.
+### Phase 6: Performance & Platform [DONE]
+- [x] Implement `bench/` suite (Throughput, Latency, Memory churn).
+- [x] JIT profiling in LuaJIT and optimization hot-fixes.
+- [x] **Cross-platform verification**: Add macOS to CI matrix.
 - [ ] **Fuzz Data Optimization**: Support keeping only a logical subset of `to_json` data (e.g., under a `tests.fuzz` key).
+
 
 ### Phase 7: Advanced Optimizations
 - [ ] **Strict Linkage**: Ensure `strict_legal_basis` in Validator triggers `strict` mode in Parser.
