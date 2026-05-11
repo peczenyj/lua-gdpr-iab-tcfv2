@@ -2,7 +2,7 @@ local tcf = require("gdpr.iab.tcfv2")
 local harness = require("test.reference.golden_harness")
 
 -- Check if LuaJIT and jit.p are available
-local has_jit, jit = pcall(require, "jit")
+local has_jit, _ = pcall(require, "jit")
 if not has_jit then
   print("Error: LuaJIT is required for profiling.")
   os.exit(1)
@@ -39,7 +39,7 @@ print("Workload: 50 passes of the Golden Corpus (~50k parses)")
 print(string.rep("-", 60))
 
 -- Start Profiling
--- Modes: 
+-- Modes:
 -- v: VM state
 -- l: Line level
 -- f: Function names
