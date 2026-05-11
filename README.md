@@ -5,6 +5,8 @@
 [![License](https://img.shields.io/github/license/peczenyj/lua-gdpr-iab-tcfv2)](LICENSE)
 [![LuaRocks](https://img.shields.io/luarocks/v/peczenyj/lua-gdpr-iab-tcfv2?logo=lua&label=luarocks)](https://luarocks.org/modules/peczenyj/lua-gdpr-iab-tcfv2)
 [![Coverage Status](https://coveralls.io/repos/github/peczenyj/lua-gdpr-iab-tcfv2/badge.svg)](https://coveralls.io/github/peczenyj/lua-gdpr-iab-tcfv2)
+[![CodeQL](https://github.com/peczenyj/lua-gdpr-iab-tcfv2/actions/workflows/github-code-scanning/codeql/badge.svg)](https://github.com/peczenyj/lua-gdpr-iab-tcfv2/actions/workflows/github-code-scanning/codeql)
+[![Dependency Review](https://github.com/peczenyj/lua-gdpr-iab-tcfv2/actions/workflows/dependency-review.yml/badge.svg)](https://github.com/peczenyj/lua-gdpr-iab-tcfv2/actions/workflows/dependency-review.yml)
 [![Latest release](https://img.shields.io/github/release/peczenyj/lua-gdpr-iab-tcfv2.svg)](https://github.com/peczenyj/lua-gdpr-iab-tcfv2/releases/latest)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/peczenyj/lua-gdpr-iab-tcfv2/blob/main/CONTRIBUTING.md#pull-request-process)
 
