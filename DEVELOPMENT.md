@@ -30,7 +30,7 @@ This installs `busted`, `luacheck`, and `luacov` locally. The `Makefile` automat
 The project uses three distinct classes of tests:
 
 1.  **Unit Tests (`make test`)**: Fast, deterministic tests for individual modules (plumbing, core logic). These are the primary target for code coverage.
-2.  **Reference Tests (`make test-reference`)**: Full scan of the 1,024-line Golden Corpus to verify validator-decision parity with the Perl reference implementation across the configured scenarios.
+2.  **Reference Tests (`make test-reference`)**: Two-layer parity check against the 1,024-line Golden Corpus. Field-level structural parity against Perl's `to_json` output across the rich tier (first 128 rows; configurable via `TCF_DEEP_LIMIT`), and validator-decision parity across all 1,024 rows.
 3.  **Fuzz Tests (`make test-fuzz`)**: Randomized sampling of the corpus and robustness testing with random bitstreams to catch crashes.
 
 ## Environment Variables
@@ -42,6 +42,7 @@ The test suite behavior can be customized using the following environment variab
 | `TCF_VERBOSE` | Set to `1` to enable detailed output and real-time Golden Corpus progress. | `0` |
 | `TCF_CONTINUE_ON_FAILURE` | Set to `1` to collect all corpus mismatches and report them at the end. | `0` |
 | `TCF_QUICK` | Set to `1` to limit the Reference scan to 128 entries. | `0` |
+| `TCF_DEEP_LIMIT` | Number of rich-tier corpus rows to deep-compare against Perl's `to_json` (Field-Level Parity describe block). | `16` |
 | `LUA_VERSION` | Manually specify the Lua version (e.g., `5.1`, `5.4`). | *Auto-detected* |
 | `LUA_BIN` | Path to the Lua executable. | `lua` |
 

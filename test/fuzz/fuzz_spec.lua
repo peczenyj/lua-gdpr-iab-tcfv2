@@ -42,6 +42,9 @@ describe("Fuzz Testing", function()
 
   describe("Random Bitstream Robustness", function()
     it("does not crash on random data", function()
+      -- Deterministic seed so this test is reproducible across CI runs.
+      -- Override with TCF_FUZZ_SEED for ad-hoc exploration.
+      math.randomseed(tonumber(os.getenv("TCF_FUZZ_SEED")) or 42)
       local chars =
         "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_"
       for _ = 1, 100 do
