@@ -5,6 +5,9 @@
 [![License](https://img.shields.io/github/license/peczenyj/lua-gdpr-iab-tcfv2)](LICENSE)
 [![LuaRocks](https://img.shields.io/luarocks/v/peczenyj/lua-gdpr-iab-tcfv2?logo=lua&label=luarocks)](https://luarocks.org/modules/peczenyj/lua-gdpr-iab-tcfv2)
 [![Coverage Status](https://coveralls.io/repos/github/peczenyj/lua-gdpr-iab-tcfv2/badge.svg)](https://coveralls.io/github/peczenyj/lua-gdpr-iab-tcfv2)
+[![Latest release](https://img.shields.io/github/release/peczenyj/lua-gdpr-iab-tcfv2.svg)](https://github.com/peczenyj/lua-gdpr-iab-tcfv2/releases/latest)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/peczenyj/lua-gdpr-iab-tcfv2/blob/main/CONTRIBUTING.md#pull-request-process)
+
 
 A high-performance, zero-dependency, version-agnostic Lua parser and validator for IAB TCF v2.x consent strings.
 
