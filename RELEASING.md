@@ -94,8 +94,9 @@ Pushing the tag triggers `release.yml`:
 
 1. Reuses `ci.yml` as the test gate across the full matrix.
 2. On a clean pass, runs `make dist` (source tarball) and `make pack` (`.src.rock`).
-3. Creates the GitHub release with `*.tar.gz`, `*.src.rock`, and `*.rockspec` attached.
-4. Publishes to LuaRocks via `luarocks upload`.
+3. Generates SLSA build provenance for the `*.tar.gz` and `*.src.rock`, then verifies it with `gh attestation verify`. A verification failure fails the job before any artifact is uploaded.
+4. Creates the GitHub release with `*.tar.gz`, `*.src.rock`, and `*.rockspec` attached.
+5. Publishes to LuaRocks via `luarocks upload`.
 
 ### 8. Sync devel back
 
@@ -109,6 +110,7 @@ git push origin devel
 
 - [ ] `release.yml` finished green on the tag.
 - [ ] The release appears at `https://github.com/peczenyj/lua-gdpr-iab-tcfv2/releases/tag/vX.Y.Z` with all three asset types attached.
+- [ ] The build provenance is listed at `https://github.com/peczenyj/lua-gdpr-iab-tcfv2/attestations`, and `gh attestation verify <downloaded-asset> --repo peczenyj/lua-gdpr-iab-tcfv2` succeeds.
 - [ ] The version is listed on `https://luarocks.org/modules/peczenyj/lua-gdpr-iab-tcfv2`.
 - [ ] `git log main --oneline` shows the merge commit followed by the tag.
 
