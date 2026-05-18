@@ -7,3 +7,5 @@ luacov.report.out
 *.rock
 *.rockspec.lock
 bench/profile_results.txt
+# where ai store documents and plans
+docs/
