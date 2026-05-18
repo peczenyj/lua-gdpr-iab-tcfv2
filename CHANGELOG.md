@@ -1,3 +1,10 @@
+## [0.2.1] - 2026-05-18
+
+### Other
+
+- *(slsa)* SLSA Build L1 provenance for releases 
+- Update readme
+
 ## [0.2.0] - 2026-05-11
 
 ### Bug Fixes
@@ -13,6 +20,7 @@
 
 ### Other
 
+- Release v0.2.0
 - Regenerate golden file based on perl corpus 
 
 ## [0.1.0] - 2026-05-11
