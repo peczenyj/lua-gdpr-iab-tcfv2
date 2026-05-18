@@ -4,11 +4,6 @@ on:
   push:
     tags: [ "v*" ]
 
-# Needed so softprops/action-gh-release@v2 can attach assets to the
-# auto-created release for this tag.
-permissions:
-  contents: write
-
 jobs:
   # Reuse the full ci.yml matrix as the release gate. If any cell
   # fails, `publish` is skipped. `secrets: inherit` lets the called
@@ -20,6 +15,13 @@ jobs:
   publish:
     needs: test
     runs-on: ubuntu-latest
+    # contents: write  -> create the release and upload assets
+    # id-token: write  -> OIDC token for keyless signing of provenance
+    # attestations: write -> store the attestation in GitHub's API
+    permissions:
+      contents: write
+      id-token: write
+      attestations: write
     steps:
       - uses: actions/checkout@v4
       - name: Setup Lua
@@ -34,6 +36,22 @@ jobs:
         run: |
           make dist
           make pack
+      - name: Generate SLSA provenance
+        uses: actions/attest-build-provenance@v2
+        with:
+          subject-path: |
+            lua-gdpr-iab-tcfv2-*.tar.gz
+            lua-gdpr-iab-tcfv2-*.src.rock
+      - name: Verify provenance
+        # Runs before the upload steps: a verification failure fails the
+        # job, so no release assets are uploaded and LuaRocks is not
+        # published. A broken-provenance release produces no artifacts.
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          for f in lua-gdpr-iab-tcfv2-*.tar.gz lua-gdpr-iab-tcfv2-*.src.rock; do
+            gh attestation verify "$f" --repo "${{ github.repository }}"
+          done
       - name: Upload GitHub Release
         uses: softprops/action-gh-release@v2
         with:
