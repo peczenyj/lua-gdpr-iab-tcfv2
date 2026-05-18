@@ -10,6 +10,7 @@
 [![Latest release](https://img.shields.io/github/release/peczenyj/lua-gdpr-iab-tcfv2.svg)](https://github.com/peczenyj/lua-gdpr-iab-tcfv2/releases/latest)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/peczenyj/lua-gdpr-iab-tcfv2/blob/main/CONTRIBUTING.md#pull-request-process)
 [![SLSA Build Level 2](https://img.shields.io/badge/SLSA-Build_Level_2-green)](https://github.com/peczenyj/lua-gdpr-iab-tcfv2/attestations)
+[![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/peczenyj/lua-gdpr-iab-tcfv2/badge)](https://securityscorecards.dev/viewer/?uri=github.com/peczenyj/lua-gdpr-iab-tcfv2)
 
 
 A high-performance, zero-dependency, version-agnostic Lua parser and validator for IAB TCF v2.x consent strings.
@@ -160,6 +161,11 @@ gh attestation verify lua-gdpr-iab-tcfv2-0.2.1.tar.gz \
 
 All attestations are listed on the repository's
 [attestations page](https://github.com/peczenyj/lua-gdpr-iab-tcfv2/attestations).
+
+Beyond provenance, every GitHub Actions dependency is pinned to a full commit
+SHA, and an [OpenSSF Scorecard](https://securityscorecards.dev/viewer/?uri=github.com/peczenyj/lua-gdpr-iab-tcfv2)
+workflow continuously audits the repository's supply-chain posture.
+
 See [SECURITY.md](SECURITY.md) for the verification details and coverage scope.
 
 ## Development
