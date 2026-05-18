@@ -9,6 +9,7 @@
 [![Dependency Review](https://github.com/peczenyj/lua-gdpr-iab-tcfv2/actions/workflows/dependency-review.yml/badge.svg)](https://github.com/peczenyj/lua-gdpr-iab-tcfv2/actions/workflows/dependency-review.yml)
 [![Latest release](https://img.shields.io/github/release/peczenyj/lua-gdpr-iab-tcfv2.svg)](https://github.com/peczenyj/lua-gdpr-iab-tcfv2/releases/latest)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/peczenyj/lua-gdpr-iab-tcfv2/blob/main/CONTRIBUTING.md#pull-request-process)
+[![SLSA Build Level 2](https://img.shields.io/badge/SLSA-Build_Level_2-green)](https://github.com/peczenyj/lua-gdpr-iab-tcfv2/attestations)
 
 
 A high-performance, zero-dependency, version-agnostic Lua parser and validator for IAB TCF v2.x consent strings.
@@ -19,6 +20,7 @@ A high-performance, zero-dependency, version-agnostic Lua parser and validator f
 - **Lazy Decoding**: Fields are decoded on-demand and cached for maximum efficiency.
 - **Zero-dependency**: No external libraries required; easy to embed.
 - **Parity-verified**: Field-level structural parity against the Perl reference implementation's serialized output across the rich tier of a 1,024-row Golden Corpus, plus validator-decision parity across all 1,024 rows.
+- **Signed releases**: Every release artifact carries SLSA Build Level 2 provenance (see [Supply-chain security](#supply-chain-security)).
 
 ## Installation
 
@@ -143,6 +145,22 @@ Measures the time to verify compliance using the `Validator` engine.
 | **Optimized Validation** | **~1,000,000 ops/s** | **~0.95 µs/op** | **Pre-fetched vendor IDs.** |
 
 **Note**: Using the `targetVendors` optimization in the parser makes the subsequent validation **over 800x faster**, making it the recommended pattern for high-traffic middleware.
+
+## Supply-chain security
+
+Every GitHub release carries [SLSA](https://slsa.dev) build provenance
+(SLSA v1.0, Build Track **Level 2**): a signed, transparency-logged statement
+of exactly which workflow and commit produced each artifact. Verify a
+downloaded artifact with the GitHub CLI (`gh` 2.49 or newer):
+
+```bash
+gh attestation verify lua-gdpr-iab-tcfv2-0.2.1.tar.gz \
+  --repo peczenyj/lua-gdpr-iab-tcfv2
+```
+
+All attestations are listed on the repository's
+[attestations page](https://github.com/peczenyj/lua-gdpr-iab-tcfv2/attestations).
+See [SECURITY.md](SECURITY.md) for the verification details and coverage scope.
 
 ## Development
 
