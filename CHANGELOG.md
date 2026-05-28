@@ -1,7 +1,14 @@
+## [0.2.2] - 2026-05-28
+
+### Features
+
+- *(validator)* Align with Go lib-gdpr strict-path semantics 
+
 ## [0.2.1] - 2026-05-18
 
 ### Other
 
+- *(release)* 0.2.1
 - *(slsa)* SLSA Build L1 provenance for releases 
 - Update readme
 
