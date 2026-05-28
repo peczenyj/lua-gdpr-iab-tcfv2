@@ -40,13 +40,19 @@ describe("Validator", function()
   end)
 
   it("fails when vendor has no consent", function()
+    -- Vendor 3 has neither vendor-level consent nor legitimate interest, so the
+    -- global vendor gate fires before any per-purpose check (Go-parity:
+    -- ReasonVendorNotAllowed).
     local v = Validator.new({
-      vendor_id = 3, -- Vendor 3 has no consent in this string
+      vendor_id = 3,
       consent_purpose_ids = { 1 },
     })
     local ok, err = v:validate(tc_string)
     assert.is_false(ok)
-    assert.are.equal("vendor 3 not allowed for purpose 1 (consent)", err)
+    assert.are.equal(
+      "vendor 3 not allowed (no consent or legitimate interest)",
+      err
+    )
   end)
 
   it("fails when purpose has no consent", function()
@@ -63,11 +69,14 @@ describe("Validator", function()
     local v = Validator.new({
       vendor_id = 284,
     })
-    -- Override vendor_id to one that doesn't have consent
+    -- Override vendor_id to one that fails the vendor gate.
     local ok, err =
       v:validate(tc_string, { vendor_id = 3, consent_purpose_ids = { 1 } })
     assert.is_false(ok)
-    assert.are.equal("vendor 3 not allowed for purpose 1 (consent)", err)
+    assert.are.equal(
+      "vendor 3 not allowed (no consent or legitimate interest)",
+      err
+    )
   end)
 
   it("validates legitimate interest", function()
@@ -137,6 +146,8 @@ describe("Validator", function()
     )
 
     it("fails when flexible purpose cannot establish either basis", function()
+      -- A non-existent vendor fails the global vendor gate before the flexible
+      -- purpose resolution is ever reached (Go-parity short-circuit).
       local v = Validator.new({
         vendor_id = 99999, -- Non-existent vendor
         consent_purpose_ids = { 1 },
@@ -144,7 +155,10 @@ describe("Validator", function()
       })
       local ok, err = v:validate(tc_string)
       assert.is_false(ok)
-      assert.match("vendor 99999 not allowed for purpose 1 %(consent%)", err)
+      assert.match(
+        "vendor 99999 not allowed %(no consent or legitimate interest%)",
+        err
+      )
     end)
   end)
 
@@ -178,14 +192,33 @@ describe("Validator", function()
 
   describe("validate_all accumulates failures", function()
     it("returns every failure from the consent loop", function()
+      -- Vendor 284 passes the vendor gate (it has consent), so the consent
+      -- loop runs and accumulates one failure per missing purpose. Purposes
+      -- 12-14 are absent from this string's consent bitfield.
       local v = Validator.new({
-        vendor_id = 99999, -- guaranteed miss across the corpus
-        consent_purpose_ids = { 1, 2, 3 },
+        vendor_id = 284,
+        consent_purpose_ids = { 12, 13, 14 },
       })
       local ok, errs = v:validate_all(tc_string)
       assert.is_false(ok)
       assert.are.equal("table", type(errs))
       assert.are.equal(3, #errs)
+    end)
+
+    it("short-circuits at the vendor gate before the purpose loops", function()
+      -- A vendor that fails the gate yields exactly one failure even in
+      -- exhaustive mode (Go-parity: the gate short-circuits).
+      local v = Validator.new({
+        vendor_id = 99999,
+        consent_purpose_ids = { 1, 2, 3 },
+      })
+      local ok, errs = v:validate_all(tc_string)
+      assert.is_false(ok)
+      assert.are.equal(1, #errs)
+      assert.are.equal(
+        "vendor 99999 not allowed (no consent or legitimate interest)",
+        errs[1]
+      )
     end)
   end)
 
