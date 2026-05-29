@@ -7,7 +7,7 @@ on:
 jobs:
   # Reuse the full ci.yml matrix as the release gate. If any cell
   # fails, `publish` is skipped. `secrets: inherit` lets the called
-  # workflow see COVERALLS_REPO_TOKEN (and anything else CI consumes).
+  # workflow see CODECOV_TOKEN (and anything else CI consumes).
   test:
     uses: ./.github/workflows/ci.yml
     secrets: inherit

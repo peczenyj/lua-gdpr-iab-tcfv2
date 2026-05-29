@@ -56,7 +56,7 @@ The test suite behavior can be customized using the following environment variab
 - `make format`: Apply `stylua` formatting in place.
 - `make check-format`: Verify formatting without modifying files (used by CI).
 - `make coverage`: Run unit tests with `luacov` enabled and print a summary.
-- `make report-coverage`: Upload coverage data to Coveralls.
+- `make report-coverage`: Generate an LCOV report (`luacov.report.out`) for Codecov upload.
 - `make bench`: Run the local benchmark suite (`bench/runner.lua`).
 - `make changelog`: Regenerate `CHANGELOG.md` from git history via `git-cliff`.
 - `make dist`: Package the source tarball for release.

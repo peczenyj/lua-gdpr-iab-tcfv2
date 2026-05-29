@@ -38,7 +38,7 @@ jobs:
       run: |
         luarocks install busted
         luarocks install luacov
-        luarocks install luacov-coveralls
+        luarocks install luacov-reporter-lcov
     - name: Run CI (Format Check, Test)
       run: |
         LUA_EXEC="lua"
@@ -56,16 +56,21 @@ jobs:
         make test LUA_BIN=$LUA_EXEC
         make test-reference LUA_BIN=$LUA_EXEC
         make test-fuzz LUA_BIN=$LUA_EXEC
-    # Gate coverage upload to a single matrix entry. Previously every
-    # Linux cell ran make coverage + uploaded to Coveralls, producing 7
+    # Gate coverage upload to a single matrix entry. Without this, every
+    # Linux cell would run make coverage + upload to Codecov, producing 7
     # duplicate uploads per CI run. Lua 5.4 is the canonical row.
     - name: Report Coverage
       if: success() && matrix.luaVersion == '5.4'
       run: |
         make coverage
         make report-coverage
-      env:
-        COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
+    - name: Upload coverage to Codecov
+      if: success() && matrix.luaVersion == '5.4'
+      uses: codecov/codecov-action@e79a6962e0d4c0c17b229090214935d2e33f8354 # v6.0.1
+      with:
+        files: ./luacov.report.out
+        fail_ci_if_error: false
+        token: ${{ secrets.CODECOV_TOKEN }}
     - name: Verify Rockspec
       run: luarocks make --tree .rocks_verify *.rockspec
 

@@ -4,7 +4,7 @@
 [![Luacheck](https://github.com/peczenyj/lua-gdpr-iab-tcfv2/workflows/Luacheck/badge.svg?label=Luacheck&logo=Lua)](https://github.com/peczenyj/lua-gdpr-iab-tcfv2/actions?workflow=Luacheck)
 [![License](https://img.shields.io/github/license/peczenyj/lua-gdpr-iab-tcfv2)](LICENSE)
 [![LuaRocks](https://img.shields.io/luarocks/v/peczenyj/lua-gdpr-iab-tcfv2?logo=lua&label=luarocks)](https://luarocks.org/modules/peczenyj/lua-gdpr-iab-tcfv2)
-[![Coverage Status](https://coveralls.io/repos/github/peczenyj/lua-gdpr-iab-tcfv2/badge.svg?branch=devel)](https://coveralls.io/github/peczenyj/lua-gdpr-iab-tcfv2?branch=devel)
+[![codecov](https://codecov.io/gh/peczenyj/lua-gdpr-iab-tcfv2/branch/devel/graph/badge.svg)](https://codecov.io/gh/peczenyj/lua-gdpr-iab-tcfv2)
 [![CodeQL](https://github.com/peczenyj/lua-gdpr-iab-tcfv2/actions/workflows/github-code-scanning/codeql/badge.svg)](https://github.com/peczenyj/lua-gdpr-iab-tcfv2/actions/workflows/github-code-scanning/codeql)
 [![Dependency Review](https://github.com/peczenyj/lua-gdpr-iab-tcfv2/actions/workflows/dependency-review.yml/badge.svg)](https://github.com/peczenyj/lua-gdpr-iab-tcfv2/actions/workflows/dependency-review.yml)
 [![Latest release](https://img.shields.io/github/release/peczenyj/lua-gdpr-iab-tcfv2.svg)](https://github.com/peczenyj/lua-gdpr-iab-tcfv2/releases/latest)

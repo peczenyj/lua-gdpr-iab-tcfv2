@@ -54,7 +54,7 @@ setup:
 	$(LUAROCKS) install busted --tree $(ROCKS_PATH)
 	$(LUAROCKS) install luacheck --tree $(ROCKS_PATH)
 	$(LUAROCKS) install luacov --tree $(ROCKS_PATH)
-	$(LUAROCKS) install luacov-coveralls --tree $(ROCKS_PATH)
+	$(LUAROCKS) install luacov-reporter-lcov --tree $(ROCKS_PATH)
 	@echo "Dependencies installed in $(ROCKS_PATH)/"
 	@echo "Note: 'stylua' must be installed manually (see DEVELOPMENT.md)"
 
@@ -94,7 +94,7 @@ coverage:
 	@grep -A 999 "Summary" luacov.report.out || cat luacov.report.out
 
 report-coverage:
-	@$(ENV_SETUP) && luacov-coveralls -i src
+	@$(ENV_SETUP) && $(LUACOV) -r lcov
 
 bench:
 	@$(ENV_SETUP) && $(LUA_BIN) bench/runner.lua
